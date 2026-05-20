@@ -1,0 +1,121 @@
+:root {
+  color-scheme: light;
+}
+
+.home {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0b1929 0%, #122a45 100%);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 48px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home__hero {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.home__hero h1 {
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.home__hero p {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 15px;
+}
+
+.home__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+}
+
+.home__card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  transition: transform 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease;
+}
+.home__card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 107, 26, 0.5);
+  background: rgba(255, 107, 26, 0.06);
+}
+
+.home__card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.home__path {
+  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: #ff944d;
+  letter-spacing: 0.02em;
+}
+.home__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+}
+.home__desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+.home__cta {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ff944d;
+  font-weight: 600;
+}
+
+.home__footer {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  text-align: center;
+  max-width: 640px;
+  line-height: 1.6;
+}
+.home__footer code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  margin: 0 2px;
+}
+
+.notfound {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0b1929;
+  color: #fff;
+}
+.notfound h1 {
+  font-size: 56px;
+  margin: 0;
+}
+.notfound a {
+  color: #ff944d;
+  text-decoration: none;
+  margin-top: 8px;
+}

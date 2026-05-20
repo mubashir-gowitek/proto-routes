@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenix Rail Systems · ServitizeIQ — Fleet Operations Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F0F3F7;--bg-card:#FFFFFF;--bg-hov:#F5F7FB;--bg-tbl:#F8F9FC;
+  --bg-sb:#0B1929;--bg-sb2:#0F2238;
+  --txt:#0B1929;--txt2:#3D5068;--txt3:#7A90A8;
+  --txt-sb:#B8CDE0;--txt-sbm:#4E6A84;
+  --bdr:#E0E8F0;--bdr2:#C8D8E8;
+  --fx:#FF6B1A;--fx-hv:#E55A0A;--fx-lt:#FFF2EA;--fx-bd:#FFDDC2;
+  --grn:#059669;--grn-bg:#ECFDF5;--grn-bd:#A7F3D0;
+  --amb:#D97706;--amb-bg:#FFFBEB;--amb-bd:#FCD34D;
+  --red:#DC2626;--red-bg:#FEF2F2;--red-bd:#FECACA;
+  --blu:#1D4ED8;--blu-bg:#EFF6FF;--blu-bd:#BFDBFE;
+  --pur:#7C3AED;--pur-bg:#F5F3FF;--pur-bd:#C4B5FD;
+  --teal:#0F766E;--teal-bg:#F0FDFA;--teal-bd:#99F6E4;
+  --gry:#64748B;--gry-bg:#F1F5F9;--gry-bd:#CBD5E1;
+  --r8:8px;--r12:12px;--r16:16px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 16px rgba(0,0,0,.08);
+  --sh-lg:0 8px 32px rgba(0,0,0,.12);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;height:100vh;overflow:hidden;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sb{width:228px;min-width:228px;background:var(--bg-sb);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:11px;}
+.lm{width:36px;height:36px;border-radius:9px;background:var(--fx);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lt-main{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:.04em;line-height:1.1;text-transform:uppercase;}
+.lt-sub{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.sb-user{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#FF6B1A,#1D4ED8);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-name{font-size:12px;font-weight:600;color:#fff;}.sb-role{font-size:10px;color:var(--txt-sbm);margin-top:1px;}
+.nav{flex:1;padding:10px 0;overflow-y:auto;}
+.ns{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-sbm);padding:12px 16px 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:12.5px;color:var(--txt-sb);cursor:pointer;border-left:2px solid transparent;transition:all .12s;}
+.ni:hover{background:rgba(255,255,255,.04);color:#fff;}
+.ni.on{background:rgba(255,107,26,.15);border-left-color:var(--fx);color:#fff;font-weight:600;}
+.nic{width:14px;height:14px;flex-shrink:0;opacity:.7;}
+.nb-red{margin-left:auto;background:rgba(220,38,38,.25);color:#FCA5A5;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;}
+.nb-fx{margin-left:auto;background:rgba(255,107,26,.2);color:#FFB380;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;}
+.sb-footer{padding:11px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:rgba(255,255,255,.25);}
+.sb-footer span{color:rgba(255,255,255,.5);font-weight:600;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.top{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;background:var(--bg-card);border-bottom:1px solid var(--bdr);flex-shrink:0;box-shadow:var(--sh);}
+.top-l{display:flex;align-items:center;gap:10px;}
+.top-r{display:flex;align-items:center;gap:8px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);animation:livepulse 2s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+.page-tabs{display:flex;background:var(--bg-card);border-bottom:1px solid var(--bdr);padding:0 24px;flex-shrink:0;}
+.ptab{padding:10px 16px 11px;font-size:13px;font-weight:500;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;position:relative;top:1px;transition:all .15s;}
+.ptab:hover{color:var(--txt);}
+.ptab.on{color:var(--fx);border-bottom-color:var(--fx);font-weight:600;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r8);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bdr);background:var(--bg-card);color:var(--txt);transition:all .12s;font-family:inherit;white-space:nowrap;}
+.btn:hover{background:var(--bg-hov);border-color:var(--bdr2);}
+.btn-p{background:var(--fx);color:#fff;border-color:var(--fx);}.btn-p:hover{background:var(--fx-hv);}
+.btn-g{border-color:transparent;background:transparent;color:var(--txt3);}
+.btn-sm{padding:4px 9px;font-size:11.5px;}
+.btn-xs{padding:2px 7px;font-size:11px;}
+
+/* ── SCROLL ── */
+.cnt{flex:1;overflow-y:auto;padding:18px 24px;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;}
+.bg{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd);}
+.ba{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd);}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.b-fx{background:var(--fx-lt);color:var(--fx);border:1px solid var(--fx-bd);}
+.b-gry{background:var(--gry-bg);color:var(--gry);border:1px solid var(--gry-bd);}
+.b-blu{background:var(--blu-bg);color:var(--blu);border:1px solid var(--blu-bd);}
+.b-pur{background:var(--pur-bg);color:var(--pur);border:1px solid var(--pur-bd);}
+.rag-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.rag-g{background:var(--grn);box-shadow:0 0 0 3px rgba(5,150,105,.15);}
+.rag-a{background:var(--amb);box-shadow:0 0 0 3px rgba(217,119,6,.15);}
+.rag-r{background:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.15);}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);padding:14px 16px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kc-fx::before{background:linear-gradient(90deg,#FF6B1A,#FFB380);}
+.kc-grn::before{background:linear-gradient(90deg,#059669,#34D399);}
+.kc-amb::before{background:linear-gradient(90deg,#D97706,#FBBF24);}
+.kc-red::before{background:linear-gradient(90deg,#DC2626,#F87171);}
+.kc-blu::before{background:linear-gradient(90deg,#1D4ED8,#60A5FA);}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:5px;}
+.kpi-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;color:var(--txt);}
+.kpi-sub{font-size:11.5px;color:var(--txt3);margin-top:4px;}
+.kpi-trend{display:flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;margin-top:4px;}
+
+/* ── ALERT STRIP ── */
+.alert-strip{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r12);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.as-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--txt2);padding-right:14px;border-right:1px solid var(--red-bd);}
+.as-item:last-child{border-right:none;}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px;}
+
+/* ── DEPOT TABLE ── */
+.depot-table{width:100%;border-collapse:collapse;}
+.depot-table thead th{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);border-bottom:2px solid var(--bdr);background:var(--bg-tbl);text-align:left;white-space:nowrap;}
+.depot-table tbody td{padding:11px 12px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.depot-table tbody tr{cursor:pointer;transition:background .1s;}
+.depot-table tbody tr:hover td{background:var(--bg-hov);}
+.depot-table tbody tr:last-child td{border-bottom:none;}
+.depot-name{font-size:13.5px;font-weight:700;color:var(--txt);}
+.depot-op{font-size:11px;color:var(--txt3);margin-top:1px;}
+.mv{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;}
+.mini-bar-bg{width:52px;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px;}
+.mini-bar-fill{height:100%;border-radius:3px;}
+.tier-chip{padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:700;}
+.tc-std{background:var(--gry-bg);color:var(--gry);}
+.tc-adv{background:var(--fx-lt);color:var(--fx);}
+.tc-eli{background:var(--pur-bg);color:var(--pur);}
+.alert-ct{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;}
+.ac-red{background:var(--red-bg);color:var(--red);}
+.ac-amb{background:var(--amb-bg);color:var(--amb);}
+.ac-none{background:var(--gry-bg);color:var(--txt3);}
+.row-acts{display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .12s;}
+.depot-table tbody tr:hover .row-acts{opacity:1;}
+
+/* ── SPARKLINE ── */
+.spark svg{display:block;}
+
+/* ── SIDEBAR PANELS ── */
+.side-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden;box-shadow:var(--sh);margin-bottom:12px;}
+.sc-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bdr);}
+.sc-title{font-size:12.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;}
+.sc-title svg{width:13px;height:13px;}
+
+/* Asset health donut */
+.health-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr);}
+.health-row:last-child{border-bottom:none;}
+.hr-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.hr-lbl{font-size:12.5px;color:var(--txt2);flex:1;}
+.hr-bar-bg{width:60px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.hr-bar-fill{height:100%;border-radius:2px;}
+.hr-ct{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;min-width:24px;text-align:right;}
+
+/* Predictive alerts */
+.pa-item{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-bottom:1px solid var(--bdr);}
+.pa-item:last-child{border-bottom:none;}
+.pa-ico{width:28px;height:28px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pa-head{font-size:12.5px;font-weight:700;color:var(--txt);}
+.pa-body{font-size:11.5px;color:var(--txt2);margin-top:2px;line-height:1.45;}
+.pa-meta{font-size:10.5px;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:3px;}
+
+/* Asset type breakdown chart */
+.asset-bar-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr);}
+.asset-bar-row:last-child{border-bottom:none;}
+.ab-lbl{font-size:12px;color:var(--txt2);min-width:130px;}
+.ab-bar-bg{flex:1;height:7px;background:var(--bdr);border-radius:4px;overflow:hidden;}
+.ab-bar-fill{height:100%;border-radius:4px;}
+.ab-ct{font-size:12.5px;font-weight:700;font-family:'DM Mono',monospace;color:var(--txt);min-width:30px;text-align:right;}
+
+/* Modal */
+.mo-ov{position:fixed;inset:0;background:rgba(11,25,41,.5);z-index:300;display:none;align-items:center;justify-content:center;}
+.mo-ov.open{display:flex;}
+.modal{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r16);box-shadow:var(--sh-lg);width:600px;overflow:hidden;max-height:88vh;display:flex;flex-direction:column;}
+.mo-hd{padding:16px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.mo-t{font-size:15px;font-weight:700;color:var(--txt);}
+.mo-s{font-size:12px;color:var(--txt3);margin-top:2px;}
+.mo-x{width:24px;height:24px;border-radius:50%;border:1px solid var(--bdr);background:var(--bg-hov);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:12px;font-family:inherit;}
+.mo-x:hover{background:var(--red-bg);color:var(--red);}
+.mo-body{padding:16px 20px;overflow-y:auto;flex:1;}
+.mo-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.mo-kpi{background:var(--bg-tbl);border:1px solid var(--bdr);border-radius:var(--r8);padding:10px 12px;text-align:center;}
+.mk-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+.mk-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3);margin-top:3px;}
+
+/* Toast */
+.ts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:5px;pointer-events:none;}
+.toast{background:var(--txt);color:#fff;padding:9px 16px;border-radius:var(--r8);font-size:12.5px;font-weight:500;box-shadow:var(--sh-lg);max-width:380px;}
+.toast.ok{background:#065F46;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="lm">
+      <!-- Fenix F mark -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M5 4h14v3H9v3h8v3H9v7H5V4z" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lt-main">Fenix Rail</div>
+      <div class="lt-sub">Powered by ServitizeIQ</div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-av">MR</div>
+    <div><div class="sb-name">Marcus Reid</div><div class="sb-role">Head of Operations</div></div>
+  </div>
+  <nav class="nav">
+    <div class="ns">Operations</div>
+    <div class="ni on">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Fleet overview
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+      Active alerts<span class="nb-red">9</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      First Fix monitoring
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Predictive maintenance
+    </div>
+    <div class="ns">Asset classes</div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Train wash systems<span class="nb-fx">8</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+      Point machines
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Signalling / CBI
+    </div>
+    <div class="ns">Commercial</div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Contract renewals<span class="nb-fx">3</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      ROI &amp; uptime reports
+    </div>
+  </nav>
+  <div class="sb-footer">Powered by <span>ServitizeIQ</span> · wPremier</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="top">
+    <div class="top-l">
+      <div style="font-size:17px;font-weight:700;color:var(--txt)">Fleet operations</div>
+      <span style="font-size:12px;color:var(--txt3)">24 active sites · 186 monitored assets · UK depots &amp; yards</span>
+    </div>
+    <div class="top-r">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--txt3)">
+        <div class="live-dot"></div> Live · refreshed 90s ago
+      </div>
+      <button class="btn btn-sm" onclick="toast('Generating fleet ops report…')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export report
+      </button>
+      <button class="btn btn-sm btn-p" onclick="toast('Opening 9 active alerts…')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        9 alerts
+      </button>
+    </div>
+  </div>
+
+  <div class="page-tabs">
+    <div class="ptab on">Fleet overview</div>
+    <div class="ptab" onclick="toast('Opening train wash system analytics…')">Train wash systems</div>
+    <div class="ptab" onclick="toast('Opening point machine health…')">Point machines</div>
+    <div class="ptab" onclick="toast('Opening signalling & CBI status…')">Signalling / CBI</div>
+    <div class="ptab" onclick="toast('Opening site benchmarking…')">Site benchmarking</div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:18px 24px;">
+
+    <!-- Critical alert strip -->
+    <div class="alert-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <div class="as-item" style="padding-left:0">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--red)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
+        <strong>Neville Hill TMD — Leeds:</strong>&nbsp;Orange Train Wash HP pump bearing — predicted failure in 12–24h · WO-2241 dispatched
+      </div>
+      <div class="as-item">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--amb)" stroke="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        <strong>Soho TMD — Birmingham:</strong>&nbsp;Pinmovio 550 motor current oscillation · 7 consecutive deviations detected
+      </div>
+      <div class="as-item">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--amb)" stroke="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        <strong>4 sites</strong>&nbsp;below contracted system availability SLA threshold
+      </div>
+      <button class="btn btn-xs btn-p" style="margin-left:auto;flex-shrink:0" onclick="toast('Opening all active alerts…')">View all 9 →</button>
+    </div>
+
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-card kc-fx">
+        <div class="kpi-lbl">System availability — MTD</div>
+        <div class="kpi-val" style="color:var(--fx)">97.2%</div>
+        <div class="kpi-sub">Target 98.0% · 3 sites below SLA</div>
+        <div class="kpi-trend" style="color:var(--amb)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          −0.8% vs May avg
+        </div>
+      </div>
+      <div class="kpi-card kc-grn">
+        <div class="kpi-lbl">Train washes today (fleet)</div>
+        <div class="kpi-val" style="color:var(--grn)">1,847</div>
+        <div class="kpi-sub">Across 8 Orange Train Wash units</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          +3.1% vs yesterday
+        </div>
+      </div>
+      <div class="kpi-card kc-amb">
+        <div class="kpi-lbl">Revenue-impact downtime</div>
+        <div class="kpi-val" style="color:var(--amb)">8.4h</div>
+        <div class="kpi-sub">MTD · est. £12,600 cost to operators</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          −41% vs prior month
+        </div>
+      </div>
+      <div class="kpi-card kc-blu">
+        <div class="kpi-lbl">Predictive interventions</div>
+        <div class="kpi-val" style="color:var(--blu)">17</div>
+        <div class="kpi-sub">This month · 15 actioned before failure</div>
+        <div class="kpi-trend" style="color:var(--blu)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          88% first-fix rate
+        </div>
+      </div>
+      <div class="kpi-card kc-red">
+        <div class="kpi-lbl">Point machine health</div>
+        <div class="kpi-val" style="color:var(--grn)">93.8%</div>
+        <div class="kpi-sub">Fleet avg · 4 machines flagged amber</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          +1.4% vs last month
+        </div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+
+      <!-- Depot/site table -->
+      <div>
+        <div style="background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden;box-shadow:var(--sh)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bdr);">
+            <div style="font-size:12.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:7px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              Depots &amp; yards — 24 active sites
+            </div>
+            <div style="display:flex;gap:6px">
+              <div style="display:flex;border:1px solid var(--bdr);border-radius:var(--r8);overflow:hidden;background:var(--bg-tbl)">
+                <button style="padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;background:var(--bg-card);color:var(--txt);font-family:inherit">All (24)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--red);font-family:inherit;font-weight:500" onclick="toast('Filtering to 2 critical sites…')">🔴 Critical (2)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--amb);font-family:inherit;font-weight:500" onclick="toast('Filtering to 6 watch sites…')">🟡 Watch (6)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--grn);font-family:inherit;font-weight:500" onclick="toast('Filtering to 16 healthy sites…')">🟢 Healthy (16)</button>
+              </div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="depot-table" id="depot-table">
+              <thead><tr>
+                <th>Depot / yard</th>
+                <th>First Fix tier</th>
+                <th>Assets</th>
+                <th>Availability MTD</th>
+                <th>Washes today</th>
+                <th>7-day trend</th>
+                <th>Alerts</th>
+                <th>Next engineer</th>
+                <th>RAG</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="depot-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+
+        <!-- Asset type breakdown -->
+        <div class="side-card">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Fleet asset health
+            </div>
+            <span style="font-size:11.5px;color:var(--txt3)">186 assets</span>
+          </div>
+          <div style="padding:0 14px">
+            <div class="health-row"><div class="hr-dot" style="background:var(--grn)"></div><div class="hr-lbl">Healthy</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:68%;background:var(--grn)"></div></div><div class="hr-ct" style="color:var(--grn)">127</div></div>
+            <div class="health-row"><div class="hr-dot" style="background:var(--amb)"></div><div class="hr-lbl">Watch</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:24%;background:var(--amb)"></div></div><div class="hr-ct" style="color:var(--amb)">45</div></div>
+            <div class="health-row"><div class="hr-dot" style="background:var(--red)"></div><div class="hr-lbl">Critical</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:8%;background:var(--red)"></div></div><div class="hr-ct" style="color:var(--red)">14</div></div>
+          </div>
+        </div>
+
+        <!-- Asset breakdown by type -->
+        <div class="side-card">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Assets by type
+            </div>
+          </div>
+          <div>
+            <div class="asset-bar-row"><div class="ab-lbl">Point machines</div><div class="ab-bar-bg"><div class="ab-bar-fill" style="width:100%;background:var(--fx)"></div></div><div class="ab-ct">84</div></div>
+            <div class="asset-bar-row"><div class="ab-lbl">Signalling / CBI</div><div class="ab-bar-bg"><div class="ab-bar-fill" style="width:56%;background:var(--blu)"></div></div><div class="ab-ct">47</div></div>
+            <div class="asset-bar-row"><div class="ab-lbl">Train wash units</div><div class="ab-bar-bg"><div class="ab-bar-fill" style="width:29%;background:var(--teal)"></div></div><div class="ab-ct">24</div></div>
+            <div class="asset-bar-row"><div class="ab-lbl">Control systems</div><div class="ab-bar-bg"><div class="ab-bar-fill" style="width:24%;background:var(--pur)"></div></div><div class="ab-ct">20</div></div>
+            <div class="asset-bar-row"><div class="ab-lbl">Other infra</div><div class="ab-bar-bg"><div class="ab-bar-fill" style="width:13%;background:var(--gry-bd)"></div></div><div class="ab-ct">11</div></div>
+          </div>
+        </div>
+
+        <!-- Predictive alerts -->
+        <div class="side-card" style="margin-bottom:0">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Latest First Fix alerts
+            </div>
+            <button class="btn btn-xs" onclick="toast('Opening all 9 active alerts…')">View all 9</button>
+          </div>
+          <div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--red-bg)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+              <div>
+                <div class="pa-head">HP pump bearing — Neville Hill TMD</div>
+                <div class="pa-body">Vibration 4.2× baseline · temp +19°C · Orange Train Wash Unit 1 · WO-2241 dispatched</div>
+                <div class="pa-meta">Today 07:48 · First Fix · Confidence 93%</div>
+              </div>
+            </div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--amb-bg)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+              <div>
+                <div class="pa-head">Pinmovio 550 motor oscillation — Soho TMD</div>
+                <div class="pa-body">±16% current variation at 2.9 Hz · 7 cycles · Point 14B · early bearing wear pattern</div>
+                <div class="pa-meta">Today 06:52 · Monitoring — no WO yet</div>
+              </div>
+            </div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--amb-bg)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+              <div>
+                <div class="pa-head">CBI relay drift — Etches Park TMD, Derby</div>
+                <div class="pa-body">Relay pick-up voltage variance 8% above baseline · 3 consecutive scans · signal degradation risk</div>
+                <div class="pa-meta">Yesterday 21:14 · Remote reset dispatched</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- SITE DETAIL MODAL -->
+<div class="mo-ov" id="site-mo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="mo-hd">
+      <div>
+        <div class="mo-t" id="mo-site-name">Neville Hill TMD — Leeds</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span class="bdg br"><span class="rag-dot rag-r" style="display:inline-block;margin-right:3px"></span>Critical</span>
+          <span class="tier-chip tc-eli">First Fix Elite</span>
+          <span style="font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace">14 assets · Northern Rail / Network Rail</span>
+        </div>
+      </div>
+      <button class="mo-x" onclick="this.closest('.mo-ov').classList.remove('open')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="mo-kpi-grid">
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--red)">93.8%</div><div class="mk-lbl">Availability MTD</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--grn)">241</div><div class="mk-lbl">Washes today</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--red)">3.2h</div><div class="mk-lbl">Downtime MTD</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--blu)">12–24h</div><div class="mk-lbl">Failure predicted</div></div>
+      </div>
+      <div style="padding:11px 14px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r12);margin-bottom:14px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--red);margin-bottom:5px">🔴 First Fix predictive alert — Orange Train Wash · HP pump bearing</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.6">Vibration RMS on the HP pump bearing has risen to 4.2× baseline over 72 hours. Bearing temperature +19°C above normal. First Fix ML model predicts bearing failure within 12–24 hours. WO-2241 dispatched — IRSE-qualified engineer scheduled for 16:00 today.</div>
+        <div style="margin-top:8px;display:flex;gap:7px">
+          <button class="btn btn-xs btn-p" onclick="toast('Opening WO-2241 in service management…')">View WO-2241</button>
+          <button class="btn btn-xs" onclick="toast('Opening HP pump sensor history…')">Sensor history</button>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px">Asset breakdown — Neville Hill TMD</div>
+      <div style="background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:0;border-bottom:1px solid var(--bdr);background:var(--bg-tbl);padding:7px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)"><span>Asset</span><span>Health</span><span>Status</span></div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px"><span style="font-weight:600">Orange Train Wash · Unit 1</span><span style="color:var(--red);font-family:'DM Mono',monospace;font-weight:700">61</span><span class="bdg br" style="font-size:10px">Critical</span></div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px"><span style="font-weight:600">Orange Train Wash · Unit 2</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">88</span><span class="bdg bg" style="font-size:10px">Healthy</span></div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px"><span style="font-weight:600">Pinmovio 550 · Points 12A–16B (6)</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">91</span><span class="bdg bg" style="font-size:10px">Healthy</span></div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;padding:9px 14px;font-size:12.5px"><span style="font-weight:600">CBI / Interlocking system</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">96</span><span class="bdg bg" style="font-size:10px">Healthy</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ts" id="ts-el"></div>
+
+<script>
+const DEPOTS = [
+  // Critical
+  {name:"Neville Hill TMD",     city:"Leeds",        op:"Northern Rail",         assets:14, tier:"Elite",    avail:93.8, washes:241, trend:[280,265,258,244,238,242,241], alerts:2, asev:"red",  next:"Today 16:00", rag:"red"},
+  {name:"Soho TMD",             city:"Birmingham",   op:"West Midlands Trains",  assets:11, tier:"Elite",    avail:94.6, washes:198, trend:[210,204,196,188,191,196,198], alerts:2, asev:"red",  next:"Tomorrow",    rag:"red"},
+  // Amber
+  {name:"Etches Park TMD",      city:"Derby",        op:"East Midlands Railway", assets:16, tier:"Elite",    avail:95.8, washes:312, trend:[324,318,308,298,304,310,312], alerts:2, asev:"amb",  next:"22 May",      rag:"amber"},
+  {name:"Knottingley TMD",      city:"Wakefield",    op:"Northern Rail",         assets:8,  tier:"Advanced", avail:96.1, washes:0,   trend:[0,0,0,0,0,0,0],             alerts:1, asev:"amb",  next:"24 May",      rag:"amber"},
+  {name:"Tyseley TMD",          city:"Birmingham",   op:"West Midlands Trains",  assets:12, tier:"Advanced", avail:96.4, washes:184, trend:[192,188,182,178,181,184,184], alerts:1, asev:"amb",  next:"25 May",      rag:"amber"},
+  {name:"Longsight TMD",        city:"Manchester",   op:"Avanti West Coast",     assets:9,  tier:"Standard", avail:96.8, washes:0,   trend:[0,0,0,0,0,0,0],             alerts:1, asev:"amb",  next:"28 May",      rag:"amber"},
+  // Green
+  {name:"Bounds Green TMD",     city:"London",       op:"Great Northern",        assets:18, tier:"Elite",    avail:99.2, washes:428, trend:[408,418,424,430,426,427,428], alerts:0, asev:"none", next:"2 Jun",       rag:"green"},
+  {name:"Hornsey TMD",          city:"London",       op:"Thameslink",            assets:14, tier:"Elite",    avail:98.9, washes:361, trend:[342,352,358,364,360,362,361], alerts:0, asev:"none", next:"4 Jun",       rag:"green"},
+  {name:"St Leonards TMD",      city:"Hastings",     op:"Southeastern",          assets:7,  tier:"Advanced", avail:98.6, washes:142, trend:[138,140,144,146,143,141,142], alerts:0, asev:"none", next:"1 Jun",       rag:"green"},
+  {name:"Glasgow Shields TMD",  city:"Glasgow",      op:"ScotRail",              assets:11, tier:"Advanced", avail:98.4, washes:218, trend:[208,212,218,222,220,217,218], alerts:0, asev:"none", next:"6 Jun",       rag:"green"},
+];
+
+function sparkline(arr){
+  const nonzero = arr.filter(v=>v>0);
+  if(nonzero.length===0) return '<span style="font-size:11px;color:var(--txt3)">no wash unit</span>';
+  const mn=Math.min(...nonzero),mx=Math.max(...nonzero),w=60,h=20;
+  const pts=nonzero.map((v,i)=>{
+    const x=i*(w/(nonzero.length-1));
+    const y=h-((v-mn)/(mx-mn||1))*(h-4)-2;
+    return `${x},${y}`;
+  }).join(' ');
+  const trend=nonzero[nonzero.length-1]>=nonzero[0];
+  return `<svg width="60" height="20" viewBox="0 0 60 20" class="spark"><polyline points="${pts}" fill="none" stroke="${trend?'var(--grn)':'var(--red)'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+}
+
+function renderDepots(){
+  const ragDot=r=>r==='red'?'<span class="rag-dot rag-r"></span>':r==='amber'?'<span class="rag-dot rag-a"></span>':'<span class="rag-dot rag-g"></span>';
+  const availColor=u=>u>=98?'var(--grn)':u>=96?'var(--txt)':'var(--red)';
+  const tierChip=t=>t==='Elite'?'<span class="tier-chip tc-eli">Elite</span>':t==='Advanced'?'<span class="tier-chip tc-adv">Advanced</span>':'<span class="tier-chip tc-std">Standard</span>';
+  const alertChip=(n,s)=>n===0?`<span class="alert-ct ac-none">—</span>`:s==='red'?`<span class="alert-ct ac-red">${n}</span>`:`<span class="alert-ct ac-amb">${n}</span>`;
+  const miniBar=(u)=>`<div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${Math.max(0,(u-90)*10)}%;background:${availColor(u)}"></div></div>`;
+
+  document.getElementById('depot-tbody').innerHTML = DEPOTS.map(d=>`
+    <tr onclick="openDepot('${d.name}','${d.city}')">
+      <td>
+        <div class="depot-name">${d.name}</div>
+        <div class="depot-op">${d.city} · ${d.op}</div>
+      </td>
+      <td>${tierChip(d.tier)}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-weight:700">${d.assets}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px">
+          ${miniBar(d.avail)}
+          <span class="mv" style="color:${availColor(d.avail)}">${d.avail}%</span>
+        </div>
+      </td>
+      <td>${d.washes>0?`<span class="mv" style="color:var(--fx)">${d.washes.toLocaleString()}</span>`:'<span style="font-size:11px;color:var(--txt3)">no unit</span>'}</td>
+      <td>${sparkline(d.trend)}</td>
+      <td>${alertChip(d.alerts,d.asev)}</td>
+      <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--txt3)">${d.next}</span></td>
+      <td>${ragDot(d.rag)}</td>
+      <td>
+        <div class="row-acts">
+          <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openDepot('${d.name}','${d.city}')">View</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openDepot(name, city){
+  document.getElementById('mo-site-name').textContent = `${name} — ${city}`;
+  document.getElementById('site-mo').classList.add('open');
+}
+
+function toast(msg,ok=false){
+  const s=document.getElementById('ts-el');
+  const t=document.createElement('div');
+  t.className='toast'+(ok?' ok':'');
+  t.textContent=msg; s.appendChild(t);
+  setTimeout(()=>t.remove(),2800);
+}
+
+renderDepots();
+</script>
+</body>
+</html>
