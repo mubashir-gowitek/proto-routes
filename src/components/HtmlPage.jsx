@@ -5,9 +5,16 @@ export default function HtmlPage({ src, title }) {
     if (title) document.title = title;
   }, [title]);
 
+  // Honor the deploy sub-path (BASE_URL is e.g. "/proto-routes/" in prod, "/" in dev).
+  // `src` is stored in routes.js as a root-relative path like "/pages/foo.html".
+  const baseUrl = import.meta.env.BASE_URL;
+  const resolvedSrc = src.startsWith('/')
+    ? baseUrl.replace(/\/$/, '') + src
+    : src;
+
   return (
     <iframe
-      src={src}
+      src={resolvedSrc}
       title={title}
       style={{
         position: 'fixed',
