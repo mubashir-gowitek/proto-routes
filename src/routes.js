@@ -17,6 +17,12 @@ const pages = [
     title: 'Fenix Rail — Fleet Operations',
     description: 'ServitizeIQ fleet operations dashboard.',
   },
+  {
+    path: '/wine-industry',
+    file: '/pages/wine-industry.html',
+    title: 'Vinotech — Fleet Operations',
+    description: 'ServitizeIQ fleet operations for the wine industry.',
+  },
 ];
 
 export default pages;

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinotech Systems · ServitizeIQ — Fleet Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* Core palette */
+  --bg:#F4F1ED;--bg-card:#FEFEFE;--bg-hov:#F7F4F0;--bg-tbl:#F9F7F4;
+  --bg-sb:#12111E;--bg-sb2:#1A1929;
+  --txt:#1A1520;--txt2:#4A3F50;--txt3:#8C7E94;
+  --txt-sb:#C4B8D0;--txt-sbm:#5A4E6A;
+  --bdr:#E2D9D0;--bdr2:#CEC3B8;
+
+  /* Vinotech accent — deep burgundy */
+  --vn:#8B1A3A;--vn-hv:#701530;--vn-lt:#FDF0F3;--vn-bd:#E8B4BF;
+  --vn-mid:#A32045;
+
+  /* Gold accent */
+  --gd:#C9A84C;--gd-lt:#FDF9EE;--gd-bd:#E8D4A0;
+
+  /* Status colours */
+  --grn:#157A4A;--grn-bg:#EDFAF3;--grn-bd:#9ADCB8;
+  --amb:#B5610A;--amb-bg:#FFF7EE;--amb-bd:#F5C896;
+  --red:#C0182C;--red-bg:#FEF2F3;--red-bd:#F5B4BB;
+  --blu:#1B4FAF;--blu-bg:#EEF3FD;--blu-bd:#B4CAF2;
+  --pur:#5E2D80;--pur-bg:#F6F0FD;--pur-bd:#CDB4EF;
+  --teal:#0A6B5E;--teal-bg:#EFFAF8;--teal-bd:#9CDFD6;
+  --gry:#5E6470;--gry-bg:#F0F1F3;--gry-bd:#C4C8D0;
+
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;
+  --sh:0 1px 4px rgba(26,21,32,.06),0 1px 2px rgba(26,21,32,.04);
+  --sh-md:0 4px 20px rgba(26,21,32,.09);
+  --sh-lg:0 8px 40px rgba(26,21,32,.14);
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;height:100vh;overflow:hidden;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sb{width:232px;min-width:232px;background:var(--bg-sb);display:flex;flex-direction:column;flex-shrink:0;position:relative;overflow:hidden;}
+/* Subtle vine texture overlay */
+.sb::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent,transparent 40px,rgba(201,168,76,.02) 40px,rgba(201,168,76,.02) 41px);pointer-events:none;}
+.sb-logo{padding:18px 16px 15px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:11px;position:relative;}
+.lm{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--vn),var(--vn-mid));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(139,26,58,.4);}
+.lt-main{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.02em;line-height:1.2;}
+.lt-sub{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+
+/* Harvest season badge */
+.harvest-badge{margin:10px 14px;padding:8px 12px;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.08));border:1px solid rgba(201,168,76,.25);border-radius:var(--r8);display:flex;align-items:center;gap:7px;}
+.hb-dot{width:7px;height:7px;border-radius:50%;background:var(--gd);animation:harvest-pulse 2.5s ease-in-out infinite;}
+@keyframes harvest-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.hb-text{font-size:11px;font-weight:600;color:var(--gd);}
+.hb-sub{font-size:9.5px;color:rgba(201,168,76,.6);margin-top:1px;}
+
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--vn),#C9A84C);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-name{font-size:12px;font-weight:600;color:#fff;}.sb-role{font-size:10px;color:var(--txt-sbm);margin-top:1px;}
+.nav{flex:1;padding:8px 0;overflow-y:auto;}
+.ns{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-sbm);padding:12px 16px 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:12.5px;color:var(--txt-sb);cursor:pointer;border-left:2px solid transparent;transition:all .13s;position:relative;}
+.ni:hover{background:rgba(255,255,255,.04);color:#fff;}
+.ni.on{background:rgba(139,26,58,.2);border-left-color:var(--vn-mid);color:#fff;font-weight:600;}
+.nic{width:14px;height:14px;flex-shrink:0;opacity:.65;}
+.nb-red{margin-left:auto;background:rgba(192,24,44,.3);color:#F5B4BB;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;}
+.nb-gd{margin-left:auto;background:rgba(201,168,76,.2);color:#E8D4A0;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;}
+.nb-grn{margin-left:auto;background:rgba(21,122,74,.25);color:#9ADCB8;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;}
+.sb-footer{padding:11px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.22);}
+.sb-footer span{color:rgba(255,255,255,.45);font-weight:600;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.top{display:flex;align-items:center;justify-content:space-between;padding:0 26px;height:56px;background:var(--bg-card);border-bottom:1px solid var(--bdr);flex-shrink:0;box-shadow:var(--sh);}
+.top-l{display:flex;align-items:center;gap:10px;}
+.page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--txt);letter-spacing:.01em;}
+.top-r{display:flex;align-items:center;gap:8px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);animation:livepulse 2s ease-in-out infinite;flex-shrink:0;}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TABS */
+.page-tabs{display:flex;background:var(--bg-card);border-bottom:1px solid var(--bdr);padding:0 26px;flex-shrink:0;}
+.ptab{padding:10px 16px 11px;font-size:13px;font-weight:500;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;position:relative;top:1px;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.ptab:hover{color:var(--txt);}
+.ptab.on{color:var(--vn);border-bottom-color:var(--vn);font-weight:600;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--r8);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bdr);background:var(--bg-card);color:var(--txt);transition:all .12s;font-family:inherit;white-space:nowrap;}
+.btn:hover{background:var(--bg-hov);border-color:var(--bdr2);}
+.btn-p{background:var(--vn);color:#fff;border-color:var(--vn);}.btn-p:hover{background:var(--vn-hv);}
+.btn-g{border-color:transparent;background:transparent;color:var(--txt3);}
+.btn-gd{background:var(--gd);color:#fff;border-color:var(--gd);}
+.btn-sm{padding:4px 10px;font-size:11.5px;}
+.btn-xs{padding:2px 7px;font-size:11px;}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;}
+.bg{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd);}
+.ba{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd);}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.b-gd{background:var(--gd-lt);color:#8A6A10;border:1px solid var(--gd-bd);}
+.b-vn{background:var(--vn-lt);color:var(--vn);border:1px solid var(--vn-bd);}
+.b-gry{background:var(--gry-bg);color:var(--gry);border:1px solid var(--gry-bd);}
+.b-pur{background:var(--pur-bg);color:var(--pur);border:1px solid var(--pur-bd);}
+.b-teal{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd);}
+.rag-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.rag-g{background:var(--grn);box-shadow:0 0 0 3px rgba(21,122,74,.12);}
+.rag-a{background:var(--amb);box-shadow:0 0 0 3px rgba(181,97,10,.12);}
+.rag-r{background:var(--red);box-shadow:0 0 0 3px rgba(192,24,44,.12);}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);padding:15px 16px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kc-vn::before{background:linear-gradient(90deg,#8B1A3A,#C9A84C);}
+.kc-grn::before{background:linear-gradient(90deg,#157A4A,#3DC47E);}
+.kc-amb::before{background:linear-gradient(90deg,#B5610A,#F5C896);}
+.kc-red::before{background:linear-gradient(90deg,#C0182C,#F5B4BB);}
+.kc-gd::before{background:linear-gradient(90deg,#C9A84C,#E8D4A0);}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:5px;}
+.kpi-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+.kpi-sub{font-size:11.5px;color:var(--txt3);margin-top:4px;}
+.kpi-trend{display:flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;margin-top:4px;}
+
+/* ── ALERT STRIP ── */
+.alert-strip{background:linear-gradient(135deg,var(--red-bg),#fff5f5);border:1px solid var(--red-bd);border-radius:var(--r12);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.as-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--txt2);padding-right:14px;border-right:1px solid var(--red-bd);}
+.as-item:last-child{border-right:none;}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;}
+
+/* ── WINERY TABLE ── */
+.winery-table{width:100%;border-collapse:collapse;}
+.winery-table thead th{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);border-bottom:2px solid var(--bdr);background:var(--bg-tbl);text-align:left;white-space:nowrap;}
+.winery-table tbody td{padding:11px 12px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.winery-table tbody tr{cursor:pointer;transition:background .1s;}
+.winery-table tbody tr:hover td{background:var(--bg-hov);}
+.winery-table tbody tr:last-child td{border-bottom:none;}
+.winery-name{font-size:13.5px;font-weight:700;color:var(--txt);}
+.winery-region{font-size:11px;color:var(--txt3);margin-top:1px;}
+.mv{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;}
+.mini-bar-bg{width:52px;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px;}
+.mini-bar-fill{height:100%;border-radius:3px;}
+.tier-chip{padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:700;}
+.tc-watch{background:var(--gd-lt);color:#8A6A10;}
+.tc-guard{background:var(--vn-lt);color:var(--vn);}
+.tc-cellar{background:var(--pur-bg);color:var(--pur);}
+.ac{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;}
+.ac-r{background:var(--red-bg);color:var(--red);}
+.ac-a{background:var(--amb-bg);color:var(--amb);}
+.ac-n{background:var(--gry-bg);color:var(--gry);}
+.row-acts{display:flex;gap:4px;opacity:0;transition:opacity .12s;}
+.winery-table tbody tr:hover .row-acts{opacity:1;}
+
+/* ── SEASON INDICATOR ── */
+.season-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;margin:6px 0;}
+.sb-seg{border-radius:3px;}
+
+/* ── SIDEBAR PANELS ── */
+.side-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden;box-shadow:var(--sh);margin-bottom:12px;}
+.sc-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bdr);}
+.sc-title{font-size:12.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;}
+.sc-title svg{width:13px;height:13px;}
+.health-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr);}
+.health-row:last-child{border-bottom:none;}
+.hr-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.hr-lbl{font-size:12.5px;color:var(--txt2);flex:1;}
+.hr-bar-bg{width:60px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.hr-bar-fill{height:100%;border-radius:2px;}
+.hr-ct{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;min-width:26px;text-align:right;}
+.asset-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr);}
+.asset-row:last-child{border-bottom:none;}
+.ar-lbl{font-size:12px;color:var(--txt2);min-width:130px;}
+.ar-bar-bg{flex:1;height:7px;background:var(--bdr);border-radius:3px;overflow:hidden;}
+.ar-bar-fill{height:100%;border-radius:3px;}
+.ar-ct{font-size:12.5px;font-weight:700;font-family:'DM Mono',monospace;color:var(--txt);min-width:26px;text-align:right;}
+
+/* Predictive alerts */
+.pa-item{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-bottom:1px solid var(--bdr);}
+.pa-item:last-child{border-bottom:none;}
+.pa-ico{width:28px;height:28px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pa-head{font-size:12.5px;font-weight:700;color:var(--txt);}
+.pa-body{font-size:11.5px;color:var(--txt2);margin-top:2px;line-height:1.45;}
+.pa-meta{font-size:10.5px;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:3px;}
+
+/* Harvest countdown */
+.harvest-countdown{background:linear-gradient(135deg,#1A1929,#2A1520);border-radius:var(--r12);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.hc-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.2),transparent 70%);}
+.hc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(201,168,76,.6);margin-bottom:6px;}
+.hc-days{font-size:32px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gd);line-height:1;}
+.hc-sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;}
+.hc-readiness{margin-top:10px;display:flex;align-items:center;gap:8px;}
+.hc-bar-bg{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.hc-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gd),#E8D4A0);}
+.hc-pct{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gd);}
+
+/* ── MODAL ── */
+.mo-ov{position:fixed;inset:0;background:rgba(18,17,30,.55);backdrop-filter:blur(2px);z-index:300;display:none;align-items:center;justify-content:center;}
+.mo-ov.open{display:flex;}
+.modal{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r16);box-shadow:var(--sh-lg);width:620px;overflow:hidden;max-height:88vh;display:flex;flex-direction:column;}
+.mo-hd{padding:16px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.mo-t{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--txt);}
+.mo-s{font-size:12px;color:var(--txt3);margin-top:2px;}
+.mo-x{width:24px;height:24px;border-radius:50%;border:1px solid var(--bdr);background:var(--bg-hov);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:12px;font-family:inherit;}
+.mo-x:hover{background:var(--red-bg);color:var(--red);}
+.mo-body{padding:16px 20px;overflow-y:auto;flex:1;}
+.mo-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.mo-kpi{background:var(--bg-tbl);border:1px solid var(--bdr);border-radius:var(--r8);padding:10px 12px;text-align:center;}
+.mk-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+.mk-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3);margin-top:3px;}
+
+/* Fermentation sparkline chart (temp trace) */
+.ferm-chart{background:var(--bg-tbl);border:1px solid var(--bdr);border-radius:var(--r8);padding:10px;margin-bottom:10px;}
+.ferm-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:8px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.ts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:5px;pointer-events:none;}
+.toast{background:var(--txt);color:#fff;padding:9px 16px;border-radius:var(--r8);font-size:12.5px;font-weight:500;box-shadow:var(--sh-lg);max-width:380px;}
+.toast.ok{background:#0D5C35;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="lm">
+      <!-- Grape/vine minimal icon -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="8" cy="15" r="2.5" fill="white" opacity=".9"/>
+        <circle cx="12" cy="11" r="2.5" fill="white"/>
+        <circle cx="16" cy="15" r="2.5" fill="white" opacity=".9"/>
+        <circle cx="10" cy="19" r="2.5" fill="white" opacity=".8"/>
+        <circle cx="14" cy="19" r="2.5" fill="white" opacity=".8"/>
+        <path d="M12 8.5 C12 5 15 3 17 3" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lt-main">Vinotech Systems</div>
+      <div class="lt-sub">Powered by ServitizeIQ</div>
+    </div>
+  </div>
+
+  <!-- Harvest countdown badge -->
+  <div class="harvest-badge">
+    <div class="hb-dot"></div>
+    <div>
+      <div class="hb-text">Harvest season: 112 days</div>
+      <div class="hb-sub">Pre-harvest readiness checks active</div>
+    </div>
+  </div>
+
+  <div class="sb-user">
+    <div class="sb-av">SR</div>
+    <div><div class="sb-name">Sophie Renaud</div><div class="sb-role">Head of Production Operations</div></div>
+  </div>
+
+  <nav class="nav">
+    <div class="ns">Operations</div>
+    <div class="ni on">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Fleet overview
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+      Active alerts<span class="nb-red">11</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Predictive maintenance
+    </div>
+    <div class="ns">Asset classes</div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+      Fermentation chillers<span class="nb-red">5</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
+      Bottling line systems<span class="nb-red">3</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20M4 20V10l8-8 8 8v10"/></svg>
+      Cellar climate units
+    </div>
+    <div class="ns">Harvest readiness</div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Pre-harvest inspection<span class="nb-gd">8</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Vintage season planner
+    </div>
+    <div class="ns">Commercial</div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Renewals<span class="nb-gd">4</span>
+    </div>
+    <div class="ni">
+      <svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Batch protection ROI
+    </div>
+  </nav>
+  <div class="sb-footer">Powered by <span>ServitizeIQ</span> · wPremier</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="top">
+    <div class="top-l">
+      <div class="page-title">Fleet operations</div>
+      <span style="font-size:12px;color:var(--txt3);margin-left:4px">28 winery clients · 312 monitored assets · 9 wine regions</span>
+    </div>
+    <div class="top-r">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--txt3)">
+        <div class="live-dot"></div> Live · 60s ago
+      </div>
+      <button class="btn btn-sm" onclick="toast('Generating fleet report…')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export report
+      </button>
+      <button class="btn btn-sm btn-p" onclick="toast('Opening 11 active alerts…')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        11 alerts
+      </button>
+    </div>
+  </div>
+
+  <div class="page-tabs">
+    <div class="ptab on">Fleet overview</div>
+    <div class="ptab" onclick="toast('Opening fermentation chiller analytics…')">Fermentation systems</div>
+    <div class="ptab" onclick="toast('Opening bottling line health…')">Bottling lines</div>
+    <div class="ptab" onclick="toast('Opening cellar climate view…')">Cellar climate</div>
+    <div class="ptab" onclick="toast('Opening pre-harvest readiness…')">
+      Harvest readiness
+      <span style="background:var(--gd);color:#fff;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:5px">112d</span>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:18px 26px;">
+
+    <!-- Critical alert strip -->
+    <div class="alert-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <div class="as-item" style="padding-left:0">
+        <span style="color:var(--red)">⬤</span>
+        <strong>Château Margaux — Bordeaux:</strong>&nbsp;Vessel 4 glycol chiller compressor bearing — failure predicted 18–36h · active fermentation · WO-7741 dispatched
+      </div>
+      <div class="as-item">
+        <span style="color:var(--amb)">⬤</span>
+        <strong>Penfolds — Barossa Valley:</strong>&nbsp;Bottling line filler head #7 — flow deviation +4.8% over 72h · underfill risk developing
+      </div>
+      <div class="as-item">
+        <span style="color:var(--amb)">⬤</span>
+        <strong>6 wineries</strong>&nbsp;flagged for pre-harvest inspection — readiness score below threshold
+      </div>
+      <button class="btn btn-xs btn-p" style="margin-left:auto;flex-shrink:0" onclick="toast('Opening all 11 active alerts…')">View all →</button>
+    </div>
+
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-card kc-vn">
+        <div class="kpi-lbl">System availability — MTD</div>
+        <div class="kpi-val" style="color:var(--vn)">97.8%</div>
+        <div class="kpi-sub">Target 98.5% · 3 sites below SLA</div>
+        <div class="kpi-trend" style="color:var(--amb)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          −0.7% vs April avg
+        </div>
+      </div>
+      <div class="kpi-card kc-grn">
+        <div class="kpi-lbl">Batches protected MTD</div>
+        <div class="kpi-val" style="color:var(--grn)">14</div>
+        <div class="kpi-sub">Predictive interventions before failure</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          £2.4M est. batch value protected
+        </div>
+      </div>
+      <div class="kpi-card kc-amb">
+        <div class="kpi-lbl">Unplanned downtime</div>
+        <div class="kpi-val" style="color:var(--amb)">6.2h</div>
+        <div class="kpi-sub">MTD · est. £48K equipment + batch cost</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          −52% vs prior month
+        </div>
+      </div>
+      <div class="kpi-card kc-gd">
+        <div class="kpi-lbl">Pre-harvest readiness</div>
+        <div class="kpi-val" style="color:#8A6A10">74%</div>
+        <div class="kpi-sub">22 of 28 clients inspection-ready</div>
+        <div class="kpi-trend" style="color:var(--amb)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          6 inspections still to schedule
+        </div>
+      </div>
+      <div class="kpi-card kc-red">
+        <div class="kpi-lbl">Fermentation temp SLA</div>
+        <div class="kpi-val" style="color:var(--grn)">99.1%</div>
+        <div class="kpi-sub">Vessels within ±0.5°C target · MTD</div>
+        <div class="kpi-trend" style="color:var(--grn)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          1 vessel excursion — resolved
+        </div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+
+      <!-- Winery table -->
+      <div>
+        <div style="background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden;box-shadow:var(--sh)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bdr);">
+            <div style="font-size:12.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:7px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+              Winery clients — 28 sites · 9 regions
+            </div>
+            <div style="display:flex;gap:6px">
+              <div style="display:flex;border:1px solid var(--bdr);border-radius:var(--r8);overflow:hidden;background:var(--bg-tbl)">
+                <button style="padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;background:var(--bg-card);color:var(--txt);font-family:inherit">All (28)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--red);font-family:inherit;font-weight:500" onclick="toast('Filtering to critical sites…')">🔴 Critical (2)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--amb);font-family:inherit;font-weight:500" onclick="toast('Filtering to watch sites…')">🟡 Watch (8)</button>
+                <button style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:none;background:none;color:var(--grn);font-family:inherit;font-weight:500" onclick="toast('Filtering to healthy sites…')">🟢 Healthy (18)</button>
+              </div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="winery-table" id="winery-table">
+              <thead><tr>
+                <th>Winery · region</th>
+                <th>Contract tier</th>
+                <th>Assets</th>
+                <th>Availability</th>
+                <th>Active batches</th>
+                <th>Harvest readiness</th>
+                <th>Alerts</th>
+                <th>Next service</th>
+                <th>RAG</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="winery-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+
+        <!-- Harvest countdown -->
+        <div class="harvest-countdown">
+          <div class="hc-glow"></div>
+          <div class="hc-title">Next harvest season</div>
+          <div class="hc-days">112 days</div>
+          <div class="hc-sub">Southern Hemisphere vintage begins Feb 2027</div>
+          <div class="hc-readiness" style="margin-top:10px">
+            <div style="font-size:11px;color:rgba(255,255,255,.5);white-space:nowrap">Fleet readiness</div>
+            <div class="hc-bar-bg"><div class="hc-bar-fill" style="width:74%"></div></div>
+            <div class="hc-pct">74%</div>
+          </div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.45);margin-top:6px">6 pre-harvest inspections still to schedule</div>
+        </div>
+
+        <!-- Asset health -->
+        <div class="side-card">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Asset health — 312 units
+            </div>
+          </div>
+          <div style="padding:0 14px">
+            <div class="health-row"><div class="hr-dot" style="background:var(--grn)"></div><div class="hr-lbl">Healthy</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:65%;background:var(--grn)"></div></div><div class="hr-ct" style="color:var(--grn)">202</div></div>
+            <div class="health-row"><div class="hr-dot" style="background:var(--amb)"></div><div class="hr-lbl">Watch</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:27%;background:var(--amb)"></div></div><div class="hr-ct" style="color:var(--amb)">85</div></div>
+            <div class="health-row"><div class="hr-dot" style="background:var(--red)"></div><div class="hr-lbl">Critical</div><div class="hr-bar-bg"><div class="hr-bar-fill" style="width:8%;background:var(--red)"></div></div><div class="hr-ct" style="color:var(--red)">25</div></div>
+          </div>
+        </div>
+
+        <!-- Asset type breakdown -->
+        <div class="side-card">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Assets by type
+            </div>
+          </div>
+          <div>
+            <div class="asset-row"><div class="ar-lbl">Fermentation chillers</div><div class="ar-bar-bg"><div class="ar-bar-fill" style="width:100%;background:var(--vn)"></div></div><div class="ar-ct">112</div></div>
+            <div class="asset-row"><div class="ar-lbl">Cellar climate units</div><div class="ar-bar-bg"><div class="ar-bar-fill" style="width:62%;background:var(--teal)"></div></div><div class="ar-ct">70</div></div>
+            <div class="asset-row"><div class="ar-lbl">Bottling line systems</div><div class="ar-bar-bg"><div class="ar-bar-fill" style="width:54%;background:var(--gd)"></div></div><div class="ar-ct">61</div></div>
+            <div class="asset-row"><div class="ar-lbl">Press / crush equipment</div><div class="ar-bar-bg"><div class="ar-bar-fill" style="width:34%;background:var(--pur)"></div></div><div class="ar-ct">38</div></div>
+            <div class="asset-row"><div class="ar-lbl">Pump stations</div><div class="ar-bar-bg"><div class="ar-bar-fill" style="width:28%;background:var(--gry-bd)"></div></div><div class="ar-ct">31</div></div>
+          </div>
+        </div>
+
+        <!-- Predictive alerts -->
+        <div class="side-card" style="margin-bottom:0">
+          <div class="sc-hd">
+            <div class="sc-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Latest predictive alerts
+            </div>
+            <button class="btn btn-xs" onclick="toast('Opening all 11 alerts…')">View all</button>
+          </div>
+          <div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--red-bg)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+              <div>
+                <div class="pa-head">Glycol chiller compressor — Château Margaux</div>
+                <div class="pa-body">Bearing vibration 4.4× baseline · temp +21°C · Vessel 4 mid-primary fermentation · WO-7741 dispatched</div>
+                <div class="pa-meta">Today 06:12 · ML confidence 91% · 18–36h to failure</div>
+              </div>
+            </div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--amb-bg)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+              <div>
+                <div class="pa-head">Filler head #7 flow deviation — Penfolds, Barossa</div>
+                <div class="pa-body">Consistent +4.8% overfill deviation across 72h · diaphragm valve wear signature · underfill risk at 120h</div>
+                <div class="pa-meta">Today 05:40 · Monitoring · Parts pre-ordered</div>
+              </div>
+            </div>
+            <div class="pa-item">
+              <div class="pa-ico" style="background:var(--gd-lt)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gd)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div>
+                <div class="pa-head">Cold stabilisation unit — Cloudy Bay, Marlborough</div>
+                <div class="pa-body">Compressor efficiency declining 8% over 30 days · refrigerant charge dropping · pre-harvest risk if unaddressed</div>
+                <div class="pa-meta">Yesterday 22:18 · Pre-harvest priority</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- WINERY DETAIL MODAL -->
+<div class="mo-ov" id="winery-mo" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="mo-hd">
+      <div>
+        <div class="mo-t" id="mo-winery-name">Château Margaux — Bordeaux, France</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+          <span class="bdg br"><span class="rag-dot rag-r" style="display:inline-block;margin-right:3px"></span>Critical</span>
+          <span class="tier-chip tc-guard">Vinoguard Premium</span>
+          <span style="font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace">12 assets · Established 1801</span>
+        </div>
+      </div>
+      <button class="mo-x" onclick="this.closest('.mo-ov').classList.remove('open')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="mo-kpi-grid">
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--red)">94.2%</div><div class="mk-lbl">Availability MTD</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--vn)">4</div><div class="mk-lbl">Active batches</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--grn)">£340K</div><div class="mk-lbl">Batch value at risk</div></div>
+        <div class="mo-kpi"><div class="mk-val" style="color:var(--amb)">18–36h</div><div class="mk-lbl">Predicted failure</div></div>
+      </div>
+
+      <!-- Fermentation temperature trace -->
+      <div class="ferm-chart">
+        <div class="ferm-title">Vessel 4 — Fermentation temperature trace (72h) · Target: 14°C ±0.5°C</div>
+        <svg viewBox="0 0 520 80" width="100%" style="display:block">
+          <defs>
+            <linearGradient id="ferm-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8B1A3A" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#8B1A3A" stop-opacity=".02"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid -->
+          <line x1="0" y1="20" x2="520" y2="20" stroke="var(--bdr)" stroke-width="0.5"/>
+          <line x1="0" y1="40" x2="520" y2="40" stroke="var(--bdr)" stroke-width="0.5"/>
+          <line x1="0" y1="60" x2="520" y2="60" stroke="var(--bdr)" stroke-width="0.5"/>
+          <!-- Target band ±0.5°C -->
+          <rect x="0" y="33" width="520" height="14" fill="rgba(21,122,74,.06)" rx="2"/>
+          <!-- Temp trace — stable then drifting up as chiller fails -->
+          <polyline points="0,40 60,39 120,40 180,39 240,38 300,36 360,30 420,22 480,14 520,8"
+            fill="none" stroke="var(--vn)" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M0,40 60,39 120,40 180,39 240,38 300,36 360,30 420,22 480,14 520,8 L520,80 L0,80Z"
+            fill="url(#ferm-grad)"/>
+          <!-- Warning zone -->
+          <line x1="300" y1="0" x2="300" y2="80" stroke="var(--amb)" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- Labels -->
+          <text x="3" y="18" font-family="DM Mono,monospace" font-size="8.5" fill="var(--txt3)">15.5°C</text>
+          <text x="3" y="38" font-family="DM Mono,monospace" font-size="8.5" fill="var(--grn)">14.0° ✓</text>
+          <text x="3" y="58" font-family="DM Mono,monospace" font-size="8.5" fill="var(--txt3)">12.5°C</text>
+          <text x="3" y="76" font-family="DM Mono,monospace" font-size="8.5" fill="var(--txt3)">–72h</text>
+          <text x="476" y="76" font-family="DM Mono,monospace" font-size="8.5" fill="var(--txt3)">Now</text>
+          <text x="302" y="12" font-family="DM Sans,sans-serif" font-size="9" fill="var(--amb)" font-weight="700">Chiller degrading</text>
+        </svg>
+      </div>
+
+      <div style="padding:11px 14px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r12);margin-bottom:14px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--red);margin-bottom:5px">🔴 Predictive alert — Glycol chiller compressor bearing · Vessel 4</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.6">Bearing vibration has risen to 4.4× baseline over 72 hours with temperature +21°C above normal. Vessel 4 is mid-primary fermentation — a chiller failure now would allow the batch temperature to drift, potentially damaging yeast viability and ruining the batch. ServitizeIQ predicts compressor failure within 18–36 hours. WO-7741 dispatched — engineer on-site by 11:00 today with replacement bearing assembly.</div>
+        <div style="margin-top:8px;display:flex;gap:7px">
+          <button class="btn btn-xs btn-p" onclick="toast('Opening WO-7741…')">View WO-7741</button>
+          <button class="btn btn-xs" onclick="toast('Opening sensor history for Vessel 4 chiller…')">Sensor history</button>
+          <button class="btn btn-xs" onclick="toast('Opening batch value report…')">Batch value at risk</button>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px">Asset summary — Château Margaux</div>
+      <div style="background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r12);overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 80px;gap:0;background:var(--bg-tbl);padding:7px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);border-bottom:1px solid var(--bdr)"><span>Asset</span><span>Health</span><span>Status</span><span>Harvest</span></div>
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px;align-items:center"><span style="font-weight:600">Glycol chiller · Vessel 4</span><span style="color:var(--red);font-family:'DM Mono',monospace;font-weight:700">38</span><span class="bdg br" style="font-size:10px">Critical</span><span style="font-size:11.5px;color:var(--red)">⚠ Risk</span></div>
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px;align-items:center"><span style="font-weight:600">Glycol chiller · Vessels 1–3</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">91</span><span class="bdg bg" style="font-size:10px">Healthy</span><span style="font-size:11.5px;color:var(--grn)">✓ Ready</span></div>
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 80px;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12.5px;align-items:center"><span style="font-weight:600">Cellar climate unit · Barrel hall A</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">88</span><span class="bdg bg" style="font-size:10px">Healthy</span><span style="font-size:11.5px;color:var(--grn)">✓ Ready</span></div>
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 80px;padding:9px 14px;font-size:12.5px;align-items:center"><span style="font-weight:600">Bottling line · Filler + labeller</span><span style="color:var(--grn);font-family:'DM Mono',monospace;font-weight:700">94</span><span class="bdg bg" style="font-size:10px">Healthy</span><span style="font-size:11.5px;color:var(--grn)">✓ Ready</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ts" id="ts-el"></div>
+
+<script>
+const WINERIES = [
+  // Critical
+  {name:"Château Margaux",    region:"Bordeaux, France",      batches:4, tier:"Premium",  avail:94.2, assets:12, harvest:82,  alerts:2, asev:"red",  next:"Today 11:00", rag:"red"},
+  {name:"Opus One",           region:"Napa Valley, USA",      batches:3, tier:"Premium",  avail:95.1, assets:10, harvest:79,  alerts:1, asev:"red",  next:"Tomorrow",    rag:"red"},
+  // Amber
+  {name:"Penfolds",           region:"Barossa Valley, AU",    batches:8, tier:"Premium",  avail:96.2, assets:18, harvest:88,  alerts:2, asev:"amb",  next:"22 May",      rag:"amber"},
+  {name:"Cloudy Bay",         region:"Marlborough, NZ",       batches:5, tier:"Cellar",   avail:96.8, assets:11, harvest:68,  alerts:1, asev:"amb",  next:"24 May",      rag:"amber"},
+  {name:"Antinori",           region:"Tuscany, Italy",        batches:6, tier:"Premium",  avail:97.1, assets:14, harvest:74,  alerts:1, asev:"amb",  next:"25 May",      rag:"amber"},
+  {name:"Torres",             region:"Penedès, Spain",        batches:4, tier:"Cellar",   avail:97.4, assets:9,  harvest:71,  alerts:1, asev:"amb",  next:"27 May",      rag:"amber"},
+  // Green
+  {name:"Leeuwin Estate",     region:"Margaret River, AU",    batches:3, tier:"Premium",  avail:99.4, assets:8,  harvest:96,  alerts:0, asev:"none", next:"2 Jun",       rag:"green"},
+  {name:"Villa Maria",        region:"Hawke's Bay, NZ",       batches:4, tier:"Cellar",   avail:98.9, assets:10, harvest:92,  alerts:0, asev:"none", next:"4 Jun",       rag:"green"},
+  {name:"Catena Zapata",      region:"Mendoza, Argentina",    batches:6, tier:"Premium",  avail:98.7, assets:13, harvest:89,  alerts:0, asev:"none", next:"1 Jun",       rag:"green"},
+  {name:"Domaine Leflaive",   region:"Burgundy, France",      batches:2, tier:"Watch",    avail:98.4, assets:7,  harvest:94,  alerts:0, asev:"none", next:"6 Jun",       rag:"green"},
+];
+
+function harvestBar(pct){
+  const color = pct>=90?'var(--grn)':pct>=70?'var(--amb)':'var(--red)';
+  return `<div style="display:flex;align-items:center;gap:5px">
+    <div style="width:52px;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px"></div></div>
+    <span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:${color}">${pct}%</span>
+  </div>`;
+}
+
+function sparkline(trend){
+  const arr=trend||[];const nonzero=arr.filter(v=>v>0);
+  if(!nonzero.length) return '<span style="font-size:11px;color:var(--txt3)">—</span>';
+  const mn=Math.min(...nonzero),mx=Math.max(...nonzero),w=60,h=20;
+  const pts=nonzero.map((v,i)=>{
+    const x=i*(w/Math.max(nonzero.length-1,1));
+    const y=h-((v-mn)/(mx-mn||1))*(h-4)-2;
+    return `${x},${y}`;
+  }).join(' ');
+  const up=nonzero[nonzero.length-1]>=nonzero[0];
+  return `<svg width="60" height="20" viewBox="0 0 60 20"><polyline points="${pts}" fill="none" stroke="${up?'var(--grn)':'var(--red)'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+}
+
+function renderWineries(){
+  const tierChip=t=>t==='Premium'?'<span class="tier-chip tc-guard">Vinoguard Premium</span>':
+                     t==='Cellar'?'<span class="tier-chip tc-cellar">Cellarsense</span>':
+                     '<span class="tier-chip tc-watch">VinWatch</span>';
+  const ragDot=r=>r==='red'?'<span class="rag-dot rag-r"></span>':r==='amber'?'<span class="rag-dot rag-a"></span>':'<span class="rag-dot rag-g"></span>';
+  const availColor=u=>u>=98?'var(--grn)':u>=96?'var(--txt)':'var(--red)';
+  const alertChip=(n,s)=>n===0?`<span class="ac ac-n">—</span>`:s==='red'?`<span class="ac ac-r">${n}</span>`:`<span class="ac ac-a">${n}</span>`;
+
+  document.getElementById('winery-tbody').innerHTML = WINERIES.map(w=>`
+    <tr onclick="openWinery('${w.name}','${w.region}')">
+      <td>
+        <div class="winery-name">${w.name}</div>
+        <div class="winery-region">${w.region}</div>
+      </td>
+      <td>${tierChip(w.tier)}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-weight:700">${w.assets}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px">
+          <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${Math.max(0,(w.avail-90)*10)}%;background:${availColor(w.avail)}"></div></div>
+          <span class="mv" style="color:${availColor(w.avail)}">${w.avail}%</span>
+        </div>
+      </td>
+      <td>
+        <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--vn)">${w.batches}</span>
+        <span style="font-size:11px;color:var(--txt3);margin-left:3px">active</span>
+      </td>
+      <td>${harvestBar(w.harvest)}</td>
+      <td>${alertChip(w.alerts,w.asev)}</td>
+      <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--txt3)">${w.next}</span></td>
+      <td>${ragDot(w.rag)}</td>
+      <td>
+        <div class="row-acts">
+          <button class="btn btn-xs btn-p" onclick="event.stopPropagation();openWinery('${w.name}','${w.region}')">View</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openWinery(name, region){
+  document.getElementById('mo-winery-name').textContent=`${name} — ${region}`;
+  document.getElementById('winery-mo').classList.add('open');
+}
+
+function toast(msg,ok=false){
+  const s=document.getElementById('ts-el');
+  const t=document.createElement('div');
+  t.className='toast'+(ok?' ok':'');
+  t.textContent=msg; s.appendChild(t);
+  setTimeout(()=>t.remove(),2800);
+}
+
+renderWineries();
+</script>
+</body>
+</html>
