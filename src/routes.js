@@ -23,6 +23,12 @@ const pages = [
     title: 'Vinotech — Fleet Operations',
     description: 'ServitizeIQ fleet operations for the wine industry.',
   },
+  {
+    path: '/usled-cm-portfolio',
+    file: '/pages/usled-cm-portfolio-dashboard.html',
+    title: 'US LED — Customer Portfolio · Commercial',
+    description: 'US LED commercial customer portfolio dashboard.',
+  },
 ];
 
 export default pages;
