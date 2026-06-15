@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2 Intelligence — Channel & Partners</title>
+<style>
+  :root{
+    --navy:#0B2545;--navy-2:#13315C;--navy-3:#1C4275;--ink:#0A1A2F;
+    --paper:#F5F7FA;--card:#FFFFFF;--line:#E3E8EF;--muted:#6B7A90;--text:#1A2433;
+    --gold:#C7A45A;--up:#137A52;--up-bg:#E5F3EC;--down:#B23A48;--down-bg:#FBE9EB;
+    --warn:#B5862B;--warn-bg:#FBF1DC;--chip:#EEF2F7;
+    --shadow:0 1px 2px rgba(11,37,69,.06),0 8px 24px rgba(11,37,69,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased}
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:var(--navy);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand .logo{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),#9c7e3e);display:grid;place-items:center;font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.5px}
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+  nav{padding:14px 12px;flex:1;overflow:auto}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:14px 12px 6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.78);font-size:13.5px;cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+  .nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(199,164,90,.16);color:#fff}
+  .nav-item.active svg{opacity:1}
+  .side-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.6)}
+  .side-foot .u{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:16px 30px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:5}
+  .crumb{font-size:12px;color:var(--muted);letter-spacing:.3px}
+  .crumb b{color:var(--text);font-weight:600}
+  .h-title{font-size:19px;font-weight:700;letter-spacing:-.2px}
+  .spacer{flex:1}
+  .seg{display:flex;background:var(--chip);border-radius:8px;padding:3px}
+  .seg button{border:0;background:transparent;font:inherit;font-size:12.5px;color:var(--muted);padding:6px 13px;border-radius:6px;cursor:pointer;font-weight:500}
+  .seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.06);font-weight:600}
+  .search{display:flex;align-items:center;gap:8px;background:var(--chip);border-radius:8px;padding:8px 12px;width:210px;color:var(--muted);font-size:13px}
+  .search input{border:0;background:transparent;outline:none;font:inherit;width:100%;color:var(--text)}
+
+  .content{padding:26px 30px 48px;max-width:1320px;width:100%}
+
+  .ai-banner{background:linear-gradient(120deg,var(--navy) 0%,var(--navy-2) 60%,var(--navy-3) 100%);color:#fff;border-radius:14px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .ai-banner::after{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(199,164,90,.22),transparent 70%)}
+  .ai-ic{width:40px;height:40px;border-radius:10px;background:rgba(199,164,90,.2);display:grid;place-items:center;flex:0 0 40px}
+  .ai-ic svg{width:22px;height:22px;color:var(--gold)}
+  .ai-eyebrow{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:5px}
+  .ai-text{font-size:15px;line-height:1.5;max-width:760px}
+  .ai-text b{color:#fff;font-weight:700}
+  .ai-hl{color:var(--gold);font-weight:600}
+  .ai-actions{margin-top:13px;display:flex;gap:10px}
+  .btn{border:0;font:inherit;font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer}
+  .btn-gold{background:var(--gold);color:var(--navy)}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px 18px;box-shadow:var(--shadow)}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:7px}
+  .kpi .val{font-size:26px;font-weight:750;letter-spacing:-.5px;margin:9px 0 6px;color:var(--ink)}
+  .kpi .val span{font-size:15px;color:var(--muted);font-weight:600}
+  .delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:20px}
+  .delta.up{color:var(--up);background:var(--up-bg)}
+  .delta.down{color:var(--down);background:var(--down-bg)}
+  .delta.warn{color:var(--warn);background:var(--warn-bg)}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:8px}
+
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:17px 20px 12px}
+  .panel-h h3{font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+  .panel-h .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .link{font-size:12px;color:var(--navy-3);font-weight:600;text-decoration:none;cursor:pointer}
+  .tabs{display:flex;gap:4px;background:var(--chip);border-radius:8px;padding:3px}
+  .tabs button{border:0;background:transparent;font:inherit;font-size:11.5px;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600}
+  .tabs button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+  /* Accounts table */
+  .tbl{padding:4px 8px 12px}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:9px 12px;font-weight:600;border-bottom:1px solid var(--line)}
+  th.r,td.r{text-align:right}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:var(--paper)}
+  .acct{display:flex;align-items:center;gap:11px}
+  .acct .ico{width:34px;height:34px;border-radius:8px;flex:0 0 34px;display:grid;place-items:center;font-size:14px;background:var(--chip)}
+  .acct .nm{font-weight:600;font-size:13px}
+  .acct .mt{font-size:11px;color:var(--muted);margin-top:1px}
+  .tag{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;display:inline-block}
+  .tag.dormant{background:var(--down-bg);color:var(--down)}
+  .tag.risk{background:var(--warn-bg);color:var(--warn)}
+  .tag.upsell{background:var(--up-bg);color:var(--up)}
+  .tag.repeat{background:#E9EEFA;color:var(--navy-3)}
+  .money{font-weight:700;color:var(--ink);font-size:13px}
+  .sub-money{font-size:11px;color:var(--muted);margin-top:1px}
+  .act{font-size:11.5px;font-weight:600;color:var(--navy);background:var(--chip);border:0;padding:7px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .act:hover{background:#e2e8f1}
+
+  /* Opportunity stack (right) */
+  .opp{padding:6px 16px 14px}
+  .opp-item{display:flex;gap:12px;padding:13px 6px;border-bottom:1px solid var(--line)}
+  .opp-item:last-child{border-bottom:0}
+  .opp-ic{width:34px;height:34px;border-radius:9px;flex:0 0 34px;display:grid;place-items:center;font-size:15px}
+  .oi-a{background:var(--down-bg)}.oi-b{background:var(--up-bg)}.oi-c{background:#E9EEFA}.oi-d{background:var(--warn-bg)}
+  .opp-b{flex:1;min-width:0}
+  .opp-t{font-size:13px;font-weight:600;line-height:1.4}
+  .opp-t em{font-style:normal;color:var(--navy-3);font-weight:700}
+  .opp-m{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .opp-v{font-size:13px;font-weight:700;color:var(--up);margin-top:5px}
+
+  /* Channel matrix lower */
+  .grid2{display:grid;grid-template-columns:1fr 1.25fr;gap:18px;margin-top:18px}
+  .chan-row{display:flex;flex-direction:column;gap:13px;padding:14px 20px 20px}
+  .chan{display:flex;flex-direction:column;gap:6px}
+  .chan-top{display:flex;justify-content:space-between;font-size:12.5px}
+  .chan-top b{font-weight:600}
+  .chan-top .v{color:var(--muted);font-weight:600}
+  .chan-bars{display:flex;height:8px;border-radius:6px;overflow:hidden;background:var(--chip)}
+  .cb{height:100%}
+  .cb.active{background:var(--navy-2)}
+  .cb.dormant{background:var(--down)}
+  .cb.new{background:var(--gold)}
+  .chan-legend{display:flex;gap:16px;font-size:11px;color:var(--muted);padding:0 20px 16px}
+  .chan-legend span{display:flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+  /* funnel / gap */
+  .gap{padding:16px 20px 20px;display:flex;flex-direction:column;gap:12px}
+  .gap-row{display:flex;align-items:center;gap:14px}
+  .gap-stage{width:150px;font-size:12.5px;font-weight:600}
+  .gap-track{flex:1;height:30px;background:var(--chip);border-radius:7px;overflow:hidden;position:relative}
+  .gap-fill{height:100%;background:linear-gradient(90deg,var(--navy-3),var(--navy-2));display:flex;align-items:center;padding-left:12px;color:#fff;font-size:12px;font-weight:600;border-radius:7px}
+  .gap-fill.g{background:linear-gradient(90deg,var(--gold),#a9863f);color:var(--navy)}
+  .gap-n{width:88px;text-align:right;font-size:12.5px;font-weight:700;color:var(--ink)}
+
+  @media(max-width:1080px){
+    .shell{grid-template-columns:1fr}.side{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark">L2</div>
+        <div><div class="name">L2 Intelligence</div><div class="sub">Revenue OS</div></div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Overview</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Command Center</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Demand & Merchandising</a>
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>Channel & Partners</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg>Inventory & Planning</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sales Copilot</a>
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="u"><div class="avatar">TJ</div><div><div style="color:#fff;font-weight:600;font-size:12.5px">TJ Morrison</div><div>VP, Commercial</div></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb">Intelligence / <b>Channel & Partners</b></div>
+        <div class="h-title">Channel & Partner Revenue Visibility</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="seg"><button>30D</button><button class="on">QTD</button><button>YTD</button><button>TTM</button></div>
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input placeholder="Search distributors, accounts…">
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- AI insight -->
+      <div class="ai-banner">
+        <div class="ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <div>
+          <div class="ai-eyebrow">AI Insight · Channel signals</div>
+          <div class="ai-text"><b>$1.9M in partner revenue is sitting idle.</b> <span class="ai-hl">34 accounts</span> that ordered consistently last year have gone quiet 60+ days, and <span class="ai-hl">18 active distributors</span> are buying caps but never apparel — a clear cross-sell gap. Re-engaging the top dormant tier alone projects <b>$640K</b> recoverable this quarter.</div>
+          <div class="ai-actions">
+            <button class="btn btn-gold">Build re-engagement list</button>
+            <button class="btn btn-ghost">Ask L2 Intelligence</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="lab">Active partner revenue</div>
+          <div class="val">$18.4<span>M</span></div>
+          <span class="delta up">▲ 8.6%</span>
+          <div class="note">QTD across 612 accounts</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Dormant accounts <span title="no order in 60+ days">ⓘ</span></div>
+          <div class="val">34</div>
+          <span class="delta warn">$1.9M at risk</span>
+          <div class="note">previously consistent buyers</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Upsell / cross-sell open</div>
+          <div class="val">$2.7<span>M</span></div>
+          <span class="delta up">▲ 22 accts</span>
+          <div class="note">single-category buyers identified</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Repeat-order rate</div>
+          <div class="val">64.8<span>%</span></div>
+          <span class="delta down">▼ 2.3 pts</span>
+          <div class="note">reorder cadence slowing</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="grid">
+        <!-- Accounts table -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Partner accounts — needs attention</h3>
+              <div class="sub">Prioritized by revenue at stake</div>
+            </div>
+            <div class="tabs"><button class="on">All</button><button>Dormant</button><button>Upsell</button><button>At risk</button></div>
+          </div>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr><th>Account</th><th>Signal</th><th class="r">Annual value</th><th class="r">Opportunity</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="acct"><div class="ico">🏟️</div><div><div class="nm">Summit Athletic Supply</div><div class="mt">Team dealer · Southeast</div></div></div></td>
+                  <td><span class="tag dormant">Dormant 74d</span></td>
+                  <td class="r"><div class="money">$412K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$188K</div><div class="sub-money">reactivation</div></td>
+                  <td class="r"><button class="act">Re-engage</button></td>
+                </tr>
+                <tr>
+                  <td><div class="acct"><div class="ico">🎓</div><div><div class="nm">Crestview Campus Stores</div><div class="mt">Bookstore group · 9 campuses</div></div></div></td>
+                  <td><span class="tag upsell">Caps only</span></td>
+                  <td class="r"><div class="money">$356K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$143K</div><div class="sub-money">apparel cross-sell</div></td>
+                  <td class="r"><button class="act">Pitch line</button></td>
+                </tr>
+                <tr>
+                  <td><div class="acct"><div class="ico">⛱️</div><div><div class="nm">Coastline Resort Group</div><div class="mt">Resort & destination</div></div></div></td>
+                  <td><span class="tag risk">Order ↓ 38%</span></td>
+                  <td class="r"><div class="money">$298K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$96K</div><div class="sub-money">win-back</div></td>
+                  <td class="r"><button class="act">Review</button></td>
+                </tr>
+                <tr>
+                  <td><div class="acct"><div class="ico">🏅</div><div><div class="nm">Northgate Team Outfitters</div><div class="mt">Team dealer · Midwest</div></div></div></td>
+                  <td><span class="tag repeat">Reorder due</span></td>
+                  <td class="r"><div class="money">$271K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$84K</div><div class="sub-money">seasonal restock</div></td>
+                  <td class="r"><button class="act">Prompt</button></td>
+                </tr>
+                <tr>
+                  <td><div class="acct"><div class="ico">🏬</div><div><div class="nm">Heritage Promo Partners</div><div class="mt">Corporate / promo</div></div></div></td>
+                  <td><span class="tag dormant">Dormant 91d</span></td>
+                  <td class="r"><div class="money">$214K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$112K</div><div class="sub-money">reactivation</div></td>
+                  <td class="r"><button class="act">Re-engage</button></td>
+                </tr>
+                <tr>
+                  <td><div class="acct"><div class="ico">🎽</div><div><div class="nm">Valley Spirit Wear</div><div class="mt">Independent retail · West</div></div></div></td>
+                  <td><span class="tag upsell">Single SKU</span></td>
+                  <td class="r"><div class="money">$168K</div><div class="sub-money">last yr</div></td>
+                  <td class="r"><div class="money" style="color:var(--up)">+$71K</div><div class="sub-money">bundle upsell</div></td>
+                  <td class="r"><button class="act">Pitch line</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Opportunity stack -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Where the growth is hiding</h3>
+              <div class="sub">AI-surfaced revenue patterns</div>
+            </div>
+            <a class="link">All →</a>
+          </div>
+          <div class="opp">
+            <div class="opp-item">
+              <div class="opp-ic oi-a">💤</div>
+              <div class="opp-b">
+                <div class="opp-t"><em>34 dormant accounts</em> with strong prior history</div>
+                <div class="opp-m">Avg 71 days since last order · concentrated in Southeast team channel</div>
+                <div class="opp-v">+$640K recoverable</div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-b">🔀</div>
+              <div class="opp-b">
+                <div class="opp-t"><em>18 cap-only distributors</em> never buying apparel</div>
+                <div class="opp-m">Strong headwear buyers with zero performance-apparel orders</div>
+                <div class="opp-v">+$1.1M cross-sell open</div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-c">🔁</div>
+              <div class="opp-b">
+                <div class="opp-t"><em>27 accounts</em> overdue for seasonal reorder</div>
+                <div class="opp-m">Historical reorder window has passed without activity</div>
+                <div class="opp-v">+$520K repeat-order</div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-d">📊</div>
+              <div class="opp-b">
+                <div class="opp-t"><em>Top 12 accounts</em> trending below their run-rate</div>
+                <div class="opp-m">Spend down 15%+ vs. trailing 12-month average</div>
+                <div class="opp-v">$430K to defend</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lower row -->
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Channel health mix</h3>
+              <div class="sub">Account status by channel</div>
+            </div>
+            <a class="link">Detail →</a>
+          </div>
+          <div class="chan-row">
+            <div class="chan">
+              <div class="chan-top"><b>Collegiate bookstores</b><span class="v">214 accounts</span></div>
+              <div class="chan-bars"><div class="cb active" style="width:78%"></div><div class="cb new" style="width:14%"></div><div class="cb dormant" style="width:8%"></div></div>
+            </div>
+            <div class="chan">
+              <div class="chan-top"><b>Team & athletic dealers</b><span class="v">163 accounts</span></div>
+              <div class="chan-bars"><div class="cb active" style="width:64%"></div><div class="cb new" style="width:11%"></div><div class="cb dormant" style="width:25%"></div></div>
+            </div>
+            <div class="chan">
+              <div class="chan-top"><b>Resort & destination</b><span class="v">98 accounts</span></div>
+              <div class="chan-bars"><div class="cb active" style="width:71%"></div><div class="cb new" style="width:18%"></div><div class="cb dormant" style="width:11%"></div></div>
+            </div>
+            <div class="chan">
+              <div class="chan-top"><b>Corporate / promo</b><span class="v">82 accounts</span></div>
+              <div class="chan-bars"><div class="cb active" style="width:58%"></div><div class="cb new" style="width:9%"></div><div class="cb dormant" style="width:33%"></div></div>
+            </div>
+            <div class="chan">
+              <div class="chan-top"><b>Independent retail</b><span class="v">55 accounts</span></div>
+              <div class="chan-bars"><div class="cb active" style="width:69%"></div><div class="cb new" style="width:20%"></div><div class="cb dormant" style="width:11%"></div></div>
+            </div>
+          </div>
+          <div class="chan-legend">
+            <span><i class="dot" style="background:var(--navy-2)"></i>Active</span>
+            <span><i class="dot" style="background:var(--gold)"></i>New / growing</span>
+            <span><i class="dot" style="background:var(--down)"></i>Dormant</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Revenue growth funnel</h3>
+              <div class="sub">Pipeline of partner revenue actions QTD</div>
+            </div>
+            <a class="link">Export →</a>
+          </div>
+          <div class="gap">
+            <div class="gap-row">
+              <div class="gap-stage">Opportunities surfaced</div>
+              <div class="gap-track"><div class="gap-fill" style="width:100%">79 accounts</div></div>
+              <div class="gap-n">$2.7M</div>
+            </div>
+            <div class="gap-row">
+              <div class="gap-stage">Actioned by reps</div>
+              <div class="gap-track"><div class="gap-fill" style="width:72%">52 accounts</div></div>
+              <div class="gap-n">$1.9M</div>
+            </div>
+            <div class="gap-row">
+              <div class="gap-stage">Re-engaged</div>
+              <div class="gap-track"><div class="gap-fill g" style="width:48%">31 accounts</div></div>
+              <div class="gap-n">$1.2M</div>
+            </div>
+            <div class="gap-row">
+              <div class="gap-stage">Revenue recovered</div>
+              <div class="gap-track"><div class="gap-fill g" style="width:31%">19 accounts</div></div>
+              <div class="gap-n">$840K</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var map = {
+    'Demand & Merchandising': 'l2-intelligence-demand.html',
+    'Channel & Partners': 'l2-intelligence-channel.html',
+    'Inventory & Planning': 'l2-intelligence-inventory.html',
+    'Sales Copilot': 'l2-intelligence-copilot.html'
+  };
+  document.querySelectorAll('nav .nav-item').forEach(function (a) {
+    var label = a.textContent.trim();
+    if (map[label]) a.setAttribute('href', map[label]);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2 Intelligence — Sales Copilot</title>
+<style>
+  :root{
+    --navy:#0B2545;--navy-2:#13315C;--navy-3:#1C4275;--ink:#0A1A2F;
+    --paper:#F5F7FA;--card:#FFFFFF;--line:#E3E8EF;--muted:#6B7A90;--text:#1A2433;
+    --gold:#C7A45A;--up:#137A52;--up-bg:#E5F3EC;--down:#B23A48;--down-bg:#FBE9EB;
+    --warn:#B5862B;--warn-bg:#FBF1DC;--chip:#EEF2F7;
+    --shadow:0 1px 2px rgba(11,37,69,.06),0 8px 24px rgba(11,37,69,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased}
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:var(--navy);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand .logo{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),#9c7e3e);display:grid;place-items:center;font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.5px}
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+  nav{padding:14px 12px;flex:1;overflow:auto}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:14px 12px 6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.78);font-size:13.5px;cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+  .nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(199,164,90,.16);color:#fff}
+  .nav-item.active svg{opacity:1}
+  .side-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.6)}
+  .side-foot .u{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  .main{display:flex;flex-direction:column;min-width:0;height:100vh}
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 30px;display:flex;align-items:center;gap:14px;flex:0 0 auto}
+  .h-title{font-size:18px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:10px}
+  .spark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--gold),#9c7e3e);display:grid;place-items:center}
+  .spark svg{width:15px;height:15px;color:var(--navy)}
+  .pill{font-size:11px;font-weight:600;color:var(--up);background:var(--up-bg);padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px}
+  .pill .d{width:7px;height:7px;border-radius:50%;background:var(--up)}
+  .spacer{flex:1}
+  .ctx{font-size:12px;color:var(--muted)}
+  .ctx b{color:var(--text);font-weight:600}
+
+  /* chat area */
+  .chat{flex:1;overflow-y:auto;padding:26px 0}
+  .stream{max-width:860px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:22px}
+
+  .msg{display:flex;gap:13px}
+  .msg.user{justify-content:flex-end}
+  .msg .bubble-user{background:var(--navy);color:#fff;padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:14px;max-width:75%;line-height:1.5}
+  .ai-av{width:32px;height:32px;border-radius:9px;flex:0 0 32px;background:linear-gradient(135deg,var(--navy-2),var(--navy-3));display:grid;place-items:center}
+  .ai-av svg{width:17px;height:17px;color:var(--gold)}
+  .ai-body{flex:1;min-width:0}
+  .ai-name{font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .ai-name .tag{font-size:9.5px;font-weight:600;color:var(--navy-3);background:#E9EEFA;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+  .ai-text{font-size:14px;line-height:1.6;color:var(--text)}
+  .ai-text p{margin-bottom:10px}
+  .ai-text b{font-weight:700;color:var(--ink)}
+  .ai-text .hl{color:var(--up);font-weight:700}
+
+  /* data card embedded in answer */
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);margin:12px 0;overflow:hidden}
+  .dcard-h{padding:13px 16px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .dcard-h h4{font-size:13px;font-weight:700}
+  .dcard-h .mt{font-size:11px;color:var(--muted);margin-top:2px}
+  .dcard-h .src{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .dcard-h .src .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+  .acct-list{padding:4px 0}
+  .acct-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .acct-row:last-child{border-bottom:0}
+  .acct-row:hover{background:var(--paper)}
+  .ar-rank{width:20px;font-size:12px;color:var(--muted);font-weight:700;text-align:center}
+  .ar-ico{width:34px;height:34px;border-radius:8px;flex:0 0 34px;display:grid;place-items:center;font-size:14px;background:var(--chip)}
+  .ar-body{flex:1;min-width:0}
+  .ar-nm{font-size:13px;font-weight:600}
+  .ar-mt{font-size:11px;color:var(--muted);margin-top:1px}
+  .ar-mt .why{color:var(--navy-3);font-weight:600}
+  .ar-val{text-align:right}
+  .ar-opp{font-size:13px;font-weight:700;color:var(--up)}
+  .ar-sub{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .ar-cta{font-size:11px;font-weight:600;color:var(--navy);background:var(--chip);border:0;padding:7px 11px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .ar-cta:hover{background:#e2e8f1}
+
+  /* mini stat strip in card */
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+  .mini>div{padding:12px 16px;border-right:1px solid var(--line)}
+  .mini>div:last-child{border-right:0}
+  .mini .ml{font-size:10.5px;color:var(--muted);font-weight:500}
+  .mini .mv{font-size:17px;font-weight:750;color:var(--ink);margin-top:3px}
+  .mini .mv span{font-size:12px;color:var(--up);font-weight:600}
+
+  /* talking points list */
+  .points{margin:6px 0 2px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+  .points li{display:flex;gap:10px;font-size:13.5px;line-height:1.5}
+  .points li .pn{width:20px;height:20px;border-radius:6px;background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;display:grid;place-items:center;flex:0 0 20px;margin-top:1px}
+  .points li b{font-weight:700;color:var(--ink)}
+
+  /* answer action buttons */
+  .ai-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .a-btn{border:0;font:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .a-gold{background:var(--gold);color:var(--navy)}
+  .a-ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+  .a-ghost svg{width:14px;height:14px}
+
+  /* composer */
+  .composer-wrap{flex:0 0 auto;border-top:1px solid var(--line);background:var(--card);padding:16px 0 20px}
+  .composer{max-width:860px;margin:0 auto;padding:0 24px}
+  .chips{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .chip{font-size:12px;font-weight:500;color:var(--navy);background:var(--paper);border:1px solid var(--line);padding:8px 13px;border-radius:20px;cursor:pointer;transition:background .15s}
+  .chip:hover{background:var(--chip)}
+  .input-box{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 18px}
+  .input-box input{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:14px;color:var(--text);padding:10px 0}
+  .input-box input::placeholder{color:var(--muted)}
+  .send{width:42px;height:42px;border-radius:10px;background:var(--navy);border:0;cursor:pointer;display:grid;place-items:center}
+  .send svg{width:19px;height:19px;color:#fff}
+  .disc{text-align:center;font-size:10.5px;color:var(--muted);margin-top:11px}
+
+  @media(max-width:1080px){.shell{grid-template-columns:1fr}.side{display:none}.mini{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark">L2</div>
+        <div><div class="name">L2 Intelligence</div><div class="sub">Revenue OS</div></div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Overview</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Command Center</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Demand & Merchandising</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>Channel & Partners</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg>Inventory & Planning</a>
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sales Copilot</a>
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="u"><div class="avatar">TJ</div><div><div style="color:#fff;font-weight:600;font-size:12.5px">TJ Morrison</div><div>VP, Commercial</div></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="h-title">
+        <div class="spark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        Sales Copilot
+      </div>
+      <div class="pill"><span class="d"></span>Live data · synced 6 min ago</div>
+      <div class="spacer"></div>
+      <div class="ctx">Context: <b>All channels</b> · Fall '26</div>
+    </div>
+
+    <!-- Chat stream -->
+    <div class="chat">
+      <div class="stream">
+
+        <!-- user -->
+        <div class="msg user">
+          <div class="bubble-user">Which 5 accounts should my team call this week, and why?</div>
+        </div>
+
+        <!-- ai answer -->
+        <div class="msg">
+          <div class="ai-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+          <div class="ai-body">
+            <div class="ai-name">L2 Intelligence <span class="tag">Reasoned over 612 accounts</span></div>
+            <div class="ai-text">
+              <p>Here are the 5 highest-priority accounts for this week, ranked by recoverable revenue and urgency. Together they represent <span class="hl">$628K</span> in near-term opportunity — and four of them have a time-sensitive trigger.</p>
+
+              <div class="dcard">
+                <div class="dcard-h">
+                  <div>
+                    <h4>This week's call list</h4>
+                    <div class="mt">Prioritized across dormant, upsell & reorder signals</div>
+                  </div>
+                  <div class="src"><span class="dot"></span>Channel + Inventory data</div>
+                </div>
+                <div class="acct-list">
+                  <div class="acct-row">
+                    <div class="ar-rank">1</div>
+                    <div class="ar-ico">🏟️</div>
+                    <div class="ar-body"><div class="ar-nm">Summit Athletic Supply</div><div class="ar-mt"><span class="why">Dormant 74 days</span> · ordered $412K last yr, peak window closing</div></div>
+                    <div class="ar-val"><div class="ar-opp">+$188K</div><div class="ar-sub">reactivation</div></div>
+                    <button class="ar-cta">Open brief</button>
+                  </div>
+                  <div class="acct-row">
+                    <div class="ar-rank">2</div>
+                    <div class="ar-ico">🎓</div>
+                    <div class="ar-body"><div class="ar-nm">Crestview Campus Stores</div><div class="ar-mt"><span class="why">Caps only</span> · buys headwear, zero apparel — cross-sell fit</div></div>
+                    <div class="ar-val"><div class="ar-opp">+$143K</div><div class="ar-sub">apparel upsell</div></div>
+                    <button class="ar-cta">Open brief</button>
+                  </div>
+                  <div class="acct-row">
+                    <div class="ar-rank">3</div>
+                    <div class="ar-ico">🏅</div>
+                    <div class="ar-body"><div class="ar-nm">Northgate Team Outfitters</div><div class="ar-mt"><span class="why">Reorder due</span> · seasonal restock window opens this week</div></div>
+                    <div class="ar-val"><div class="ar-opp">+$84K</div><div class="ar-sub">repeat order</div></div>
+                    <button class="ar-cta">Open brief</button>
+                  </div>
+                  <div class="acct-row">
+                    <div class="ar-rank">4</div>
+                    <div class="ar-ico">⛱️</div>
+                    <div class="ar-body"><div class="ar-nm">Coastline Resort Group</div><div class="ar-mt"><span class="why">Orders ↓ 38%</span> · slipping below run-rate, defend before churn</div></div>
+                    <div class="ar-val"><div class="ar-opp">+$96K</div><div class="ar-sub">win-back</div></div>
+                    <button class="ar-cta">Open brief</button>
+                  </div>
+                  <div class="acct-row">
+                    <div class="ar-rank">5</div>
+                    <div class="ar-ico">🏬</div>
+                    <div class="ar-body"><div class="ar-nm">Heritage Promo Partners</div><div class="ar-mt"><span class="why">Dormant 91 days</span> · large prior spend, no contact logged</div></div>
+                    <div class="ar-val"><div class="ar-opp">+$112K</div><div class="ar-sub">reactivation</div></div>
+                    <button class="ar-cta">Open brief</button>
+                  </div>
+                </div>
+                <div class="mini">
+                  <div><div class="ml">Total opportunity</div><div class="mv">$628K</div></div>
+                  <div><div class="ml">Time-sensitive</div><div class="mv">4 <span>accounts</span></div></div>
+                  <div><div class="ml">Est. close window</div><div class="mv">14 <span>days</span></div></div>
+                </div>
+              </div>
+
+              <p>Want me to draft an outreach brief for each, or just the top account?</p>
+            </div>
+            <div class="ai-actions">
+              <button class="a-btn a-gold">Draft all 5 briefs</button>
+              <button class="a-btn a-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Assign to reps</button>
+              <button class="a-btn a-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Export to CRM</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- second exchange -->
+        <div class="msg user">
+          <div class="bubble-user">Build the brief for Crestview — what do I pitch and how big could it get?</div>
+        </div>
+
+        <div class="msg">
+          <div class="ai-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+          <div class="ai-body">
+            <div class="ai-name">L2 Intelligence <span class="tag">Account brief</span></div>
+            <div class="ai-text">
+              <p><b>Crestview Campus Stores</b> — 9-campus bookstore group, $356K in headwear last year, <b>zero apparel orders</b>. They're a textbook cross-sell: strong cap velocity, an audience already buying L2, and a category they've never been shown.</p>
+              <p><b>The pitch — lead with what's already working for them:</b></p>
+              <ul class="points">
+                <li><span class="pn">1</span><div>Their <b>Richardson 112 collegiate</b> line is up 23% — frame performance apparel as the natural extension of a cap program that's already winning on their campuses.</div></li>
+                <li><span class="pn">2</span><div>Bundle the <b>Performance Polo (Coaches)</b> — peer campus stores attaching apparel see a <b>34% larger</b> average order.</div></li>
+                <li><span class="pn">3</span><div>Timing: fall sell-through is tracking ahead of forecast, so position a pre-season apparel order before week 38 stock tightens.</div></li>
+              </ul>
+              <div class="dcard">
+                <div class="mini">
+                  <div><div class="ml">Conservative</div><div class="mv">$143K</div></div>
+                  <div><div class="ml">If full bundle attaches</div><div class="mv">$210K</div></div>
+                  <div><div class="ml">Confidence</div><div class="mv">High</div></div>
+                </div>
+              </div>
+              <p>I can put this into an email to their buyer in L2's voice, or a one-page leave-behind.</p>
+            </div>
+            <div class="ai-actions">
+              <button class="a-btn a-gold">Draft the email</button>
+              <button class="a-btn a-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>One-page leave-behind</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Composer -->
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="chips">
+          <button class="chip">What's at risk in the Southeast this month?</button>
+          <button class="chip">Which SKUs will stock out before peak?</button>
+          <button class="chip">Show accounts buying caps but not apparel</button>
+          <button class="chip">Summarize this week for the leadership call</button>
+        </div>
+        <div class="input-box">
+          <input placeholder="Ask about accounts, SKUs, regions, or this week's priorities…">
+          <button class="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></button>
+        </div>
+        <div class="disc">L2 Intelligence reasons over live merchandising, channel & inventory data. Verify before acting on large orders.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var map = {
+    'Demand & Merchandising': 'l2-intelligence-demand.html',
+    'Channel & Partners': 'l2-intelligence-channel.html',
+    'Inventory & Planning': 'l2-intelligence-inventory.html',
+    'Sales Copilot': 'l2-intelligence-copilot.html'
+  };
+  document.querySelectorAll('nav .nav-item').forEach(function (a) {
+    var label = a.textContent.trim();
+    if (map[label]) a.setAttribute('href', map[label]);
+  });
+})();
+</script>
+</body>
+</html>

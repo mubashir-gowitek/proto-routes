@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2 Intelligence — Inventory & Planning</title>
+<style>
+  :root{
+    --navy:#0B2545;--navy-2:#13315C;--navy-3:#1C4275;--ink:#0A1A2F;
+    --paper:#F5F7FA;--card:#FFFFFF;--line:#E3E8EF;--muted:#6B7A90;--text:#1A2433;
+    --gold:#C7A45A;--up:#137A52;--up-bg:#E5F3EC;--down:#B23A48;--down-bg:#FBE9EB;
+    --warn:#B5862B;--warn-bg:#FBF1DC;--chip:#EEF2F7;
+    --shadow:0 1px 2px rgba(11,37,69,.06),0 8px 24px rgba(11,37,69,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased}
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:var(--navy);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand .logo{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),#9c7e3e);display:grid;place-items:center;font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.5px}
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+  nav{padding:14px 12px;flex:1;overflow:auto}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:14px 12px 6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.78);font-size:13.5px;cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+  .nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(199,164,90,.16);color:#fff}
+  .nav-item.active svg{opacity:1}
+  .side-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.6)}
+  .side-foot .u{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:16px 30px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:5}
+  .crumb{font-size:12px;color:var(--muted);letter-spacing:.3px}
+  .crumb b{color:var(--text);font-weight:600}
+  .h-title{font-size:19px;font-weight:700;letter-spacing:-.2px}
+  .spacer{flex:1}
+  .seg{display:flex;background:var(--chip);border-radius:8px;padding:3px}
+  .seg button{border:0;background:transparent;font:inherit;font-size:12.5px;color:var(--muted);padding:6px 13px;border-radius:6px;cursor:pointer;font-weight:500}
+  .seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.06);font-weight:600}
+  .search{display:flex;align-items:center;gap:8px;background:var(--chip);border-radius:8px;padding:8px 12px;width:210px;color:var(--muted);font-size:13px}
+  .search input{border:0;background:transparent;outline:none;font:inherit;width:100%;color:var(--text)}
+
+  .content{padding:26px 30px 48px;max-width:1320px;width:100%}
+
+  .ai-banner{background:linear-gradient(120deg,var(--navy) 0%,var(--navy-2) 60%,var(--navy-3) 100%);color:#fff;border-radius:14px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .ai-banner::after{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(199,164,90,.22),transparent 70%)}
+  .ai-ic{width:40px;height:40px;border-radius:10px;background:rgba(199,164,90,.2);display:grid;place-items:center;flex:0 0 40px}
+  .ai-ic svg{width:22px;height:22px;color:var(--gold)}
+  .ai-eyebrow{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:5px}
+  .ai-text{font-size:15px;line-height:1.5;max-width:760px}
+  .ai-text b{color:#fff;font-weight:700}
+  .ai-hl{color:var(--gold);font-weight:600}
+  .ai-actions{margin-top:13px;display:flex;gap:10px}
+  .btn{border:0;font:inherit;font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer}
+  .btn-gold{background:var(--gold);color:var(--navy)}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px 18px;box-shadow:var(--shadow)}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:7px}
+  .kpi .val{font-size:26px;font-weight:750;letter-spacing:-.5px;margin:9px 0 6px;color:var(--ink)}
+  .kpi .val span{font-size:15px;color:var(--muted);font-weight:600}
+  .delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:20px}
+  .delta.up{color:var(--up);background:var(--up-bg)}
+  .delta.down{color:var(--down);background:var(--down-bg)}
+  .delta.warn{color:var(--warn);background:var(--warn-bg)}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:8px}
+
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:17px 20px 12px}
+  .panel-h h3{font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+  .panel-h .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .link{font-size:12px;color:var(--navy-3);font-weight:600;text-decoration:none;cursor:pointer}
+  .tabs{display:flex;gap:4px;background:var(--chip);border-radius:8px;padding:3px}
+  .tabs button{border:0;background:transparent;font:inherit;font-size:11.5px;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600}
+  .tabs button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+  /* Seasonal demand curve (SVG) */
+  .curve{padding:8px 20px 18px}
+  .curve-legend{display:flex;gap:16px;margin-bottom:8px;font-size:11.5px;color:var(--muted)}
+  .curve-legend span{display:flex;align-items:center;gap:6px}
+  .ln{width:16px;height:0;border-top:2px solid;display:inline-block}
+  svg .grid-l{stroke:var(--line);stroke-width:1}
+  svg text{font-size:10px;fill:var(--muted);font-family:inherit}
+
+  /* Stock position table */
+  .tbl{padding:4px 8px 12px}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:9px 12px;font-weight:600;border-bottom:1px solid var(--line)}
+  th.r,td.r{text-align:right}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:var(--paper)}
+  .sku{display:flex;align-items:center;gap:11px}
+  .sku .ico{width:34px;height:34px;border-radius:8px;flex:0 0 34px;display:grid;place-items:center;font-size:14px;background:var(--chip)}
+  .sku .nm{font-weight:600;font-size:13px}
+  .sku .mt{font-size:11px;color:var(--muted);margin-top:1px}
+  .tag{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;display:inline-block}
+  .tag.stockout{background:var(--down-bg);color:var(--down)}
+  .tag.low{background:var(--warn-bg);color:var(--warn)}
+  .tag.over{background:#E9EEFA;color:var(--navy-3)}
+  .tag.healthy{background:var(--up-bg);color:var(--up)}
+  /* cover meter */
+  .cover{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+  .cover-track{width:74px;height:7px;background:var(--chip);border-radius:5px;overflow:hidden}
+  .cover-fill{height:100%;border-radius:5px}
+  .cf-low{background:var(--down)}.cf-mid{background:var(--warn)}.cf-ok{background:var(--up)}.cf-over{background:var(--navy-3)}
+  .cover-n{font-size:12px;font-weight:600;color:var(--ink);width:46px;text-align:right}
+  .act{font-size:11.5px;font-weight:600;color:var(--navy);background:var(--chip);border:0;padding:7px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .act:hover{background:#e2e8f1}
+  .act.gold{background:var(--gold);color:var(--navy)}
+
+  /* Reallocation recos (right) */
+  .opp{padding:6px 16px 14px}
+  .opp-item{display:flex;gap:12px;padding:13px 6px;border-bottom:1px solid var(--line)}
+  .opp-item:last-child{border-bottom:0}
+  .opp-ic{width:34px;height:34px;border-radius:9px;flex:0 0 34px;display:grid;place-items:center;font-size:15px}
+  .oi-a{background:var(--down-bg)}.oi-b{background:var(--warn-bg)}.oi-c{background:var(--up-bg)}.oi-d{background:#E9EEFA}
+  .opp-b{flex:1;min-width:0}
+  .opp-t{font-size:13px;font-weight:600;line-height:1.4}
+  .opp-t em{font-style:normal;color:var(--navy-3);font-weight:700}
+  .opp-m{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .opp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+  .opp-v{font-size:13px;font-weight:700;color:var(--up)}
+  .opp-cta{font-size:11px;font-weight:600;color:var(--navy);background:var(--chip);border:0;padding:6px 11px;border-radius:7px;cursor:pointer}
+
+  /* lower row */
+  .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px}
+  /* regional heat */
+  .heat{padding:14px 20px 20px}
+  .heat-row{display:grid;grid-template-columns:120px 1fr;align-items:center;gap:14px;margin-bottom:12px}
+  .heat-row:last-child{margin-bottom:0}
+  .heat-lab{font-size:12.5px;font-weight:600}
+  .heat-cells{display:flex;gap:6px}
+  .hc{flex:1;height:30px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:600;color:#fff}
+  .heat-head{display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:10px}
+  .heat-head .hh{display:flex;gap:6px}
+  .heat-head .hh span{flex:1;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+  .heat-legend{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:14px}
+  .heat-scale{display:flex;gap:3px}
+  .heat-scale i{width:22px;height:10px;border-radius:2px}
+
+  /* aging inventory bars */
+  .age{padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
+  .age-item .age-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+  .age-item .age-top b{font-weight:600}
+  .age-item .age-top .v{color:var(--muted);font-weight:600}
+  .age-track{height:9px;background:var(--chip);border-radius:6px;overflow:hidden}
+  .age-fill{height:100%;border-radius:6px}
+  .af-fresh{background:var(--up)}.af-mid{background:var(--gold)}.af-old{background:var(--warn)}.af-dead{background:var(--down)}
+  .age-foot{font-size:11.5px;color:var(--muted);margin-top:4px}
+
+  @media(max-width:1080px){
+    .shell{grid-template-columns:1fr}.side{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark">L2</div>
+        <div><div class="name">L2 Intelligence</div><div class="sub">Revenue OS</div></div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Overview</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Command Center</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Demand & Merchandising</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>Channel & Partners</a>
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg>Inventory & Planning</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sales Copilot</a>
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="u"><div class="avatar">TJ</div><div><div style="color:#fff;font-weight:600;font-size:12.5px">TJ Morrison</div><div>VP, Commercial</div></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb">Intelligence / <b>Inventory & Planning</b></div>
+        <div class="h-title">Inventory & Seasonal Planning</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="seg"><button>Now</button><button class="on">Fall '26</button><button>Holiday</button><button>Spring '27</button></div>
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input placeholder="Search SKUs, warehouses…">
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- AI insight -->
+      <div class="ai-banner">
+        <div class="ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <div>
+          <div class="ai-eyebrow">AI Insight · Seasonal forecast</div>
+          <div class="ai-text"><b>Fall demand is arriving 2 weeks early — and you're positioned for last year's curve.</b> <span class="ai-hl">7 hero SKUs</span> will stock out before peak at current sell-through, while <span class="ai-hl">$1.3M of slow-movers</span> sits idle in the West DC. Rebalancing now protects an estimated <b>$612K</b> in missed-sale risk this season.</div>
+          <div class="ai-actions">
+            <button class="btn btn-gold">Review rebalancing plan</button>
+            <button class="btn btn-ghost">Ask L2 Intelligence</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="lab">Missed-sale risk <span title="forecast revenue lost to stockouts">ⓘ</span></div>
+          <div class="val">$612<span>K</span></div>
+          <span class="delta warn">7 hero SKUs exposed</span>
+          <div class="note">at current sell-through pace</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Slow-moving capital</div>
+          <div class="val">$1.3<span>M</span></div>
+          <span class="delta down">▲ $180K</span>
+          <div class="note">90+ days, aging fast</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Forecast accuracy</div>
+          <div class="val">91.4<span>%</span></div>
+          <span class="delta up">▲ 6.2 pts</span>
+          <div class="note">vs. prior manual planning</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Avg weeks of cover</div>
+          <div class="val">6.8<span>wks</span></div>
+          <span class="delta down">▼ 1.4 wks</span>
+          <div class="note">tightening into peak</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="grid">
+        <!-- Seasonal demand curve -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Seasonal demand vs. stock position</h3>
+              <div class="sub">Forecast demand (gold) against projected on-hand (navy)</div>
+            </div>
+            <div class="tabs"><button class="on">Structured caps</button><button>Beanies</button><button>Apparel</button></div>
+          </div>
+          <div class="curve">
+            <div class="curve-legend">
+              <span><i class="ln" style="border-color:var(--gold)"></i>Forecast demand</span>
+              <span><i class="ln" style="border-color:var(--navy-2)"></i>Projected on-hand</span>
+              <span><i class="ln" style="border-color:var(--down);border-top-style:dashed"></i>Stockout window</span>
+            </div>
+            <svg viewBox="0 0 620 230" width="100%" height="230" preserveAspectRatio="none">
+              <!-- grid -->
+              <line class="grid-l" x1="40" y1="20" x2="600" y2="20"/>
+              <line class="grid-l" x1="40" y1="65" x2="600" y2="65"/>
+              <line class="grid-l" x1="40" y1="110" x2="600" y2="110"/>
+              <line class="grid-l" x1="40" y1="155" x2="600" y2="155"/>
+              <line class="grid-l" x1="40" y1="200" x2="600" y2="200"/>
+              <!-- stockout window -->
+              <rect x="395" y="20" width="95" height="180" fill="#B23A48" opacity="0.07"/>
+              <line x1="395" y1="20" x2="395" y2="200" stroke="#B23A48" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.6"/>
+              <text x="400" y="34" fill="#B23A48" font-weight="600">Stockout risk · Wk 38–40</text>
+              <!-- demand curve (gold) -->
+              <path d="M40,170 C120,150 180,90 250,70 S360,30 430,38 S540,80 600,110" fill="none" stroke="#C7A45A" stroke-width="2.5"/>
+              <!-- on-hand (navy) -->
+              <path d="M40,120 C120,118 180,128 250,138 S360,165 430,185 S540,140 600,118" fill="none" stroke="#13315C" stroke-width="2.5"/>
+              <!-- gap markers -->
+              <circle cx="430" cy="38" r="3.5" fill="#C7A45A"/>
+              <circle cx="430" cy="185" r="3.5" fill="#13315C"/>
+              <line x1="430" y1="42" x2="430" y2="181" stroke="#B23A48" stroke-width="1" stroke-dasharray="2 2"/>
+              <!-- x labels -->
+              <text x="40" y="220">Wk 30</text>
+              <text x="180" y="220">Wk 33</text>
+              <text x="320" y="220">Wk 36</text>
+              <text x="430" y="220" fill="#B23A48" font-weight="600">Wk 38</text>
+              <text x="560" y="220">Wk 42</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Rebalancing recommendations -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Recommended moves</h3>
+              <div class="sub">Ranked by revenue protected</div>
+            </div>
+            <a class="link">All →</a>
+          </div>
+          <div class="opp">
+            <div class="opp-item">
+              <div class="opp-ic oi-a">🚚</div>
+              <div class="opp-b">
+                <div class="opp-t">Transfer <em>Richardson 112</em> from West DC → Southeast</div>
+                <div class="opp-m">Southeast covers 3.1 wks; demand surging 23%</div>
+                <div class="opp-foot"><div class="opp-v">+$210K protected</div><button class="opp-cta">Create move</button></div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-b">⏱️</div>
+              <div class="opp-b">
+                <div class="opp-t">Pull forward <em>knit beanie</em> PO by 2 weeks</div>
+                <div class="opp-m">Demand 31% ahead of curve; lead time 4 wks</div>
+                <div class="opp-foot"><div class="opp-v">+$164K protected</div><button class="opp-cta">Adjust PO</button></div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-c">🏷️</div>
+              <div class="opp-b">
+                <div class="opp-t">Markdown <em>flat-brim snapback</em> overstock</div>
+                <div class="opp-m">142 days on hand; velocity ↓ 6%; freeing capital</div>
+                <div class="opp-foot"><div class="opp-v">$118K recovered</div><button class="opp-cta">Plan promo</button></div>
+              </div>
+            </div>
+            <div class="opp-item">
+              <div class="opp-ic oi-d">📦</div>
+              <div class="opp-b">
+                <div class="opp-t">Hold <em>outerwear</em> replenishment</div>
+                <div class="opp-m">Demand tracking 18% below forecast; overbuy risk</div>
+                <div class="opp-foot"><div class="opp-v">$96K avoided</div><button class="opp-cta">Hold PO</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock position table -->
+      <div class="panel" style="margin-top:18px">
+        <div class="panel-h">
+          <div>
+            <h3>Stock position — needs action</h3>
+            <div class="sub">SKUs flagged for stockout, overstock, or reorder</div>
+          </div>
+          <div class="tabs"><button class="on">All</button><button>Stockout risk</button><button>Overstock</button><button>Reorder</button></div>
+        </div>
+        <div class="tbl">
+          <table>
+            <thead>
+              <tr><th>SKU</th><th>Status</th><th class="r">On hand</th><th class="r">Forecast / wk</th><th class="r">Weeks of cover</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="sku"><div class="ico">🧢</div><div><div class="nm">Richardson 112 — Collegiate Navy</div><div class="mt">Structured · West DC</div></div></div></td>
+                <td><span class="tag stockout">Stockout risk</span></td>
+                <td class="r">4,210</td>
+                <td class="r">2,180</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-low" style="width:16%"></div></div><div class="cover-n">1.9w</div></div></td>
+                <td class="r"><button class="act gold">Reorder</button></td>
+              </tr>
+              <tr>
+                <td><div class="sku"><div class="ico">🧶</div><div><div class="nm">Cuffed Knit Beanie — Charcoal</div><div class="mt">Seasonal · Central DC</div></div></div></td>
+                <td><span class="tag low">Low cover</span></td>
+                <td class="r">6,840</td>
+                <td class="r">2,460</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-mid" style="width:34%"></div></div><div class="cover-n">2.8w</div></div></td>
+                <td class="r"><button class="act gold">Reorder</button></td>
+              </tr>
+              <tr>
+                <td><div class="sku"><div class="ico">👕</div><div><div class="nm">Performance Polo — Coaches</div><div class="mt">Apparel · East DC</div></div></div></td>
+                <td><span class="tag healthy">Healthy</span></td>
+                <td class="r">9,120</td>
+                <td class="r">1,310</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-ok" style="width:62%"></div></div><div class="cover-n">7.0w</div></div></td>
+                <td class="r"><button class="act">Monitor</button></td>
+              </tr>
+              <tr>
+                <td><div class="sku"><div class="ico">🧢</div><div><div class="nm">Flat-Brim Snapback — Black</div><div class="mt">Structured · West DC</div></div></div></td>
+                <td><span class="tag over">Overstock</span></td>
+                <td class="r">18,460</td>
+                <td class="r">920</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-over" style="width:100%"></div></div><div class="cover-n">20w+</div></div></td>
+                <td class="r"><button class="act">Markdown</button></td>
+              </tr>
+              <tr>
+                <td><div class="sku"><div class="ico">🧥</div><div><div class="nm">Quarter-Zip Outerwear — Slate</div><div class="mt">Apparel · Central DC</div></div></div></td>
+                <td><span class="tag over">Overstock</span></td>
+                <td class="r">11,230</td>
+                <td class="r">680</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-over" style="width:90%"></div></div><div class="cover-n">16.5w</div></div></td>
+                <td class="r"><button class="act">Hold PO</button></td>
+              </tr>
+              <tr>
+                <td><div class="sku"><div class="ico">🎒</div><div><div class="nm">Game-Day Backpack — Navy</div><div class="mt">Carry · East DC</div></div></div></td>
+                <td><span class="tag low">Low cover</span></td>
+                <td class="r">3,540</td>
+                <td class="r">1,040</td>
+                <td class="r"><div class="cover"><div class="cover-track"><div class="cover-fill cf-mid" style="width:38%"></div></div><div class="cover-n">3.4w</div></div></td>
+                <td class="r"><button class="act gold">Reorder</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lower row -->
+      <div class="grid2">
+        <!-- Regional cover heatmap -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Weeks of cover by region</h3>
+              <div class="sub">Where to rebalance before peak</div>
+            </div>
+            <a class="link">Detail →</a>
+          </div>
+          <div class="heat">
+            <div class="heat-head">
+              <div></div>
+              <div class="hh"><span>Caps</span><span>Beanies</span><span>Apparel</span><span>Carry</span></div>
+            </div>
+            <div class="heat-row">
+              <div class="heat-lab">Southeast</div>
+              <div class="heat-cells">
+                <div class="hc" style="background:#B23A48">1.9</div>
+                <div class="hc" style="background:#C77D33">3.1</div>
+                <div class="hc" style="background:#137A52">7.4</div>
+                <div class="hc" style="background:#C77D33">3.6</div>
+              </div>
+            </div>
+            <div class="heat-row">
+              <div class="heat-lab">Northeast</div>
+              <div class="heat-cells">
+                <div class="hc" style="background:#C77D33">3.2</div>
+                <div class="hc" style="background:#B23A48">2.1</div>
+                <div class="hc" style="background:#137A52">6.8</div>
+                <div class="hc" style="background:#137A52">8.0</div>
+              </div>
+            </div>
+            <div class="heat-row">
+              <div class="heat-lab">Midwest</div>
+              <div class="heat-cells">
+                <div class="hc" style="background:#137A52">6.5</div>
+                <div class="hc" style="background:#C77D33">3.8</div>
+                <div class="hc" style="background:#137A52">9.1</div>
+                <div class="hc" style="background:#137A52">7.2</div>
+              </div>
+            </div>
+            <div class="heat-row">
+              <div class="heat-lab">West</div>
+              <div class="heat-cells">
+                <div class="hc" style="background:#1C4275">20+</div>
+                <div class="hc" style="background:#137A52">8.4</div>
+                <div class="hc" style="background:#1C4275">16</div>
+                <div class="hc" style="background:#137A52">7.0</div>
+              </div>
+            </div>
+            <div class="heat-legend">
+              <span>Tight</span>
+              <div class="heat-scale">
+                <i style="background:#B23A48"></i><i style="background:#C77D33"></i><i style="background:#137A52"></i><i style="background:#1C4275"></i>
+              </div>
+              <span>Overstocked</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aging inventory -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Inventory aging</h3>
+              <div class="sub">Capital tied up by age band</div>
+            </div>
+            <a class="link">Export →</a>
+          </div>
+          <div class="age">
+            <div class="age-item">
+              <div class="age-top"><b>0–30 days · Fresh</b><span class="v">$8.9M · 64%</span></div>
+              <div class="age-track"><div class="age-fill af-fresh" style="width:64%"></div></div>
+              <div class="age-foot">Selling within forecast window</div>
+            </div>
+            <div class="age-item">
+              <div class="age-top"><b>31–60 days</b><span class="v">$2.6M · 19%</span></div>
+              <div class="age-track"><div class="age-fill af-mid" style="width:19%"></div></div>
+              <div class="age-foot">On pace, monitor velocity</div>
+            </div>
+            <div class="age-item">
+              <div class="age-top"><b>61–90 days</b><span class="v">$1.0M · 7%</span></div>
+              <div class="age-track"><div class="age-fill af-old" style="width:7%"></div></div>
+              <div class="age-foot">Flag for promotion before peak ends</div>
+            </div>
+            <div class="age-item">
+              <div class="age-top"><b>90+ days · At risk</b><span class="v">$1.3M · 10%</span></div>
+              <div class="age-track"><div class="age-fill af-dead" style="width:10%"></div></div>
+              <div class="age-foot">Markdown candidates · West DC heavy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var map = {
+    'Demand & Merchandising': 'l2-intelligence-demand.html',
+    'Channel & Partners': 'l2-intelligence-channel.html',
+    'Inventory & Planning': 'l2-intelligence-inventory.html',
+    'Sales Copilot': 'l2-intelligence-copilot.html'
+  };
+  document.querySelectorAll('nav .nav-item').forEach(function (a) {
+    var label = a.textContent.trim();
+    if (map[label]) a.setAttribute('href', map[label]);
+  });
+})();
+</script>
+</body>
+</html>

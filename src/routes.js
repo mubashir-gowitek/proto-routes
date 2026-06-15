@@ -29,6 +29,13 @@ const pages = [
     title: 'US LED — Customer Portfolio · Commercial',
     description: 'US LED commercial customer portfolio dashboard.',
   },
+  {
+    path: '/ecom-intelligence-platform',
+    file: '/pages/l2-intelligence-demand.html',
+    title: 'L2 Intelligence — E-com Intelligence Platform',
+    description:
+      'E-commerce intelligence platform with linked Demand, Channel, Inventory, and Sales Copilot views.',
+  },
 ];
 
 export default pages;

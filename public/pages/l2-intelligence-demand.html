@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2 Intelligence — Demand & Merchandising</title>
+<style>
+  :root{
+    --navy:#0B2545;        /* L2 deep navy */
+    --navy-2:#13315C;
+    --navy-3:#1C4275;
+    --ink:#0A1A2F;
+    --paper:#F5F7FA;
+    --card:#FFFFFF;
+    --line:#E3E8EF;
+    --muted:#6B7A90;
+    --text:#1A2433;
+    --gold:#C7A45A;        /* heritage accent */
+    --up:#137A52;
+    --up-bg:#E5F3EC;
+    --down:#B23A48;
+    --down-bg:#FBE9EB;
+    --chip:#EEF2F7;
+    --shadow:0 1px 2px rgba(11,37,69,.06),0 8px 24px rgba(11,37,69,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    background:var(--paper);color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- Shell ---------- */
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{
+    background:var(--navy);color:#fff;display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand .logo{display:flex;align-items:center;gap:10px}
+  .brand .mark{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(135deg,var(--gold),#9c7e3e);
+    display:grid;place-items:center;font-weight:800;color:var(--navy);
+    font-size:15px;letter-spacing:.5px;
+  }
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+  nav{padding:14px 12px;flex:1;overflow:auto}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:14px 12px 6px}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;
+    color:rgba(255,255,255,.78);font-size:13.5px;cursor:pointer;margin-bottom:2px;
+    text-decoration:none;transition:background .15s,color .15s;
+  }
+  .nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(199,164,90,.16);color:#fff}
+  .nav-item.active svg{opacity:1}
+  .side-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.6)}
+  .side-foot .u{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  /* ---------- Main ---------- */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    background:var(--card);border-bottom:1px solid var(--line);
+    padding:16px 30px;display:flex;align-items:center;gap:18px;
+    position:sticky;top:0;z-index:5;
+  }
+  .crumb{font-size:12px;color:var(--muted);letter-spacing:.3px}
+  .crumb b{color:var(--text);font-weight:600}
+  .h-title{font-size:19px;font-weight:700;letter-spacing:-.2px}
+  .spacer{flex:1}
+  .seg{display:flex;background:var(--chip);border-radius:8px;padding:3px}
+  .seg button{border:0;background:transparent;font:inherit;font-size:12.5px;color:var(--muted);
+    padding:6px 13px;border-radius:6px;cursor:pointer;font-weight:500}
+  .seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.06);font-weight:600}
+  .search{
+    display:flex;align-items:center;gap:8px;background:var(--chip);border-radius:8px;
+    padding:8px 12px;width:210px;color:var(--muted);font-size:13px;
+  }
+  .search input{border:0;background:transparent;outline:none;font:inherit;width:100%;color:var(--text)}
+
+  .content{padding:26px 30px 48px;max-width:1320px;width:100%}
+
+  /* AI insight banner */
+  .ai-banner{
+    background:linear-gradient(120deg,var(--navy) 0%,var(--navy-2) 60%,var(--navy-3) 100%);
+    color:#fff;border-radius:14px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;
+    margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .ai-banner::after{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;
+    background:radial-gradient(circle,rgba(199,164,90,.22),transparent 70%)}
+  .ai-ic{width:40px;height:40px;border-radius:10px;background:rgba(199,164,90,.2);
+    display:grid;place-items:center;flex:0 0 40px}
+  .ai-ic svg{width:22px;height:22px;color:var(--gold)}
+  .ai-eyebrow{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:5px}
+  .ai-text{font-size:15px;line-height:1.5;max-width:760px}
+  .ai-text b{color:#fff;font-weight:700}
+  .ai-hl{color:var(--gold);font-weight:600}
+  .ai-actions{margin-top:13px;display:flex;gap:10px}
+  .btn{border:0;font:inherit;font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer}
+  .btn-gold{background:var(--gold);color:var(--navy)}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+  /* KPI row */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px 18px;box-shadow:var(--shadow)}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:7px}
+  .kpi .val{font-size:26px;font-weight:750;letter-spacing:-.5px;margin:9px 0 6px;color:var(--ink)}
+  .kpi .val span{font-size:15px;color:var(--muted);font-weight:600}
+  .delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:20px}
+  .delta.up{color:var(--up);background:var(--up-bg)}
+  .delta.down{color:var(--down);background:var(--down-bg)}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:8px}
+
+  /* Main grid */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:17px 20px 12px}
+  .panel-h h3{font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+  .panel-h .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .link{font-size:12px;color:var(--navy-3);font-weight:600;text-decoration:none;cursor:pointer}
+
+  /* Velocity bar chart */
+  .chart{padding:6px 20px 20px}
+  .legend{display:flex;gap:16px;margin-bottom:12px;font-size:11.5px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .bars{display:flex;align-items:flex-end;gap:18px;height:200px;padding-top:6px;border-bottom:1px solid var(--line)}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+  .bar-stack{width:100%;max-width:46px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:3px}
+  .bar{width:100%;border-radius:5px 5px 0 0;position:relative;transition:opacity .15s}
+  .bar:hover{opacity:.82}
+  .bar.rev{background:var(--navy-2)}
+  .bar.mar{background:var(--gold);border-radius:0 0 5px 5px}
+  .bar-x{font-size:11px;color:var(--muted);font-weight:500;text-align:center;line-height:1.25}
+
+  /* Movers list */
+  .movers{padding:6px 12px 14px}
+  .mover{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:9px}
+  .mover:hover{background:var(--paper)}
+  .m-rank{width:22px;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
+  .m-thumb{width:38px;height:38px;border-radius:8px;flex:0 0 38px;display:grid;place-items:center;font-size:16px;background:var(--chip)}
+  .m-body{flex:1;min-width:0}
+  .m-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .m-val{text-align:right}
+  .m-rev{font-size:13px;font-weight:700;color:var(--ink)}
+  .m-vel{font-size:11px;font-weight:600;margin-top:2px}
+  .m-vel.up{color:var(--up)}.m-vel.down{color:var(--down)}
+
+  /* lower row */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .seg-row{display:flex;flex-direction:column;gap:13px;padding:14px 20px 20px}
+  .seg-item .seg-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+  .seg-item .seg-top b{font-weight:600}
+  .seg-item .seg-top .v{color:var(--muted);font-weight:600}
+  .track{height:8px;background:var(--chip);border-radius:6px;overflow:hidden}
+  .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--navy-3),var(--navy-2))}
+  .fill.g{background:linear-gradient(90deg,var(--gold),#a9863f)}
+
+  .reco{display:flex;gap:13px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .reco:last-child{border-bottom:0}
+  .reco .ric{width:32px;height:32px;border-radius:8px;flex:0 0 32px;display:grid;place-items:center;font-size:15px}
+  .ric.a{background:var(--up-bg)}.ric.b{background:#FFF3DC}.ric.c{background:#E9EEFA}
+  .reco .rb{flex:1}
+  .reco .rt{font-size:13px;font-weight:600;line-height:1.4}
+  .reco .rt em{font-style:normal;color:var(--navy-3);font-weight:700}
+  .reco .rm{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .reco .rcta{align-self:center;font-size:11.5px;font-weight:600;color:var(--navy);background:var(--chip);
+    border:0;padding:7px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+
+  @media(max-width:1080px){
+    .shell{grid-template-columns:1fr}.side{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark">L2</div>
+        <div>
+          <div class="name">L2 Intelligence</div>
+          <div class="sub">Revenue OS</div>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Overview</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Command Center</a>
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Demand & Merchandising</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>Channel & Partners</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg>Inventory & Planning</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sales Copilot</a>
+      <div class="nav-label">Workspace</div>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="u"><div class="avatar">TJ</div><div><div style="color:#fff;font-weight:600;font-size:12.5px">TJ Morrison</div><div>VP, Commercial</div></div></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb">Intelligence / <b>Demand & Merchandising</b></div>
+        <div class="h-title">Demand & Merchandising Intelligence</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="seg">
+        <button>7D</button><button class="on">30D</button><button>QTD</button><button>YTD</button>
+      </div>
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input placeholder="Search SKUs, accounts…">
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- AI insight -->
+      <div class="ai-banner">
+        <div class="ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <div>
+          <div class="ai-eyebrow">AI Insight · Updated 14 min ago</div>
+          <div class="ai-text"><b>Structured headwear is accelerating into peak season.</b> Revenue velocity on the <span class="ai-hl">richardson 112 line</span> is up <b>23%</b> across collegiate campuses, but margin is slipping on 3 distributors running deep discounts. Reallocating fall inventory toward the <span class="ai-hl">Southeast region</span> could recover an estimated <b>$418K</b> in at-risk Q3 revenue.</div>
+          <div class="ai-actions">
+            <button class="btn btn-gold">View recommended actions</button>
+            <button class="btn btn-ghost">Ask L2 Intelligence</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="lab">Revenue velocity <span title="rate of revenue per active SKU">ⓘ</span></div>
+          <div class="val">$2.84<span>M / wk</span></div>
+          <span class="delta up">▲ 12.4%</span>
+          <div class="note">vs. prior 30 days</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Blended margin</div>
+          <div class="val">41.6<span>%</span></div>
+          <span class="delta down">▼ 1.8 pts</span>
+          <div class="note">discount pressure in 3 channels</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Active SKUs selling</div>
+          <div class="val">1,247</div>
+          <span class="delta up">▲ 64</span>
+          <div class="note">88 newly entered velocity tier</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Sell-through rate</div>
+          <div class="val">73.2<span>%</span></div>
+          <span class="delta up">▲ 4.1 pts</span>
+          <div class="note">seasonal lines tracking ahead</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="grid">
+        <!-- Velocity chart -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Revenue velocity by product line</h3>
+              <div class="sub">Weekly revenue (navy) vs. margin contribution (gold)</div>
+            </div>
+            <a class="link">Breakdown →</a>
+          </div>
+          <div class="chart">
+            <div class="legend">
+              <span><i class="dot" style="background:var(--navy-2)"></i>Revenue velocity</span>
+              <span><i class="dot" style="background:var(--gold)"></i>Margin contribution</span>
+            </div>
+            <div class="bars">
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:62%"></div><div class="bar mar" style="height:26%"></div></div><div class="bar-x">Structured<br>Caps</div></div>
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:50%"></div><div class="bar mar" style="height:22%"></div></div><div class="bar-x">Trucker<br>Mesh</div></div>
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:40%"></div><div class="bar mar" style="height:30%"></div></div><div class="bar-x">Performance<br>Apparel</div></div>
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:33%"></div><div class="bar mar" style="height:15%"></div></div><div class="bar-x">Knit<br>Beanies</div></div>
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:28%"></div><div class="bar mar" style="height:19%"></div></div><div class="bar-x">Bags &<br>Carry</div></div>
+              <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:20%"></div><div class="bar mar" style="height:9%"></div></div><div class="bar-x">Outerwear</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top movers -->
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Top revenue movers</h3>
+              <div class="sub">Fastest acceleration this period</div>
+            </div>
+            <a class="link">All SKUs →</a>
+          </div>
+          <div class="movers">
+            <div class="mover">
+              <div class="m-rank">1</div>
+              <div class="m-thumb">🧢</div>
+              <div class="m-body"><div class="m-name">Richardson 112 — Collegiate</div><div class="m-sub">Structured · 214 campuses</div></div>
+              <div class="m-val"><div class="m-rev">$612K</div><div class="m-vel up">▲ 23%</div></div>
+            </div>
+            <div class="mover">
+              <div class="m-rank">2</div>
+              <div class="m-thumb">🧶</div>
+              <div class="m-body"><div class="m-name">Cuffed Knit Beanie</div><div class="m-sub">Seasonal · Northeast surge</div></div>
+              <div class="m-val"><div class="m-rev">$338K</div><div class="m-vel up">▲ 31%</div></div>
+            </div>
+            <div class="mover">
+              <div class="m-rank">3</div>
+              <div class="m-thumb">👕</div>
+              <div class="m-body"><div class="m-name">Performance Polo — Coaches</div><div class="m-sub">Apparel · Team channel</div></div>
+              <div class="m-val"><div class="m-rev">$287K</div><div class="m-vel up">▲ 14%</div></div>
+            </div>
+            <div class="mover">
+              <div class="m-rank">4</div>
+              <div class="m-thumb">🎒</div>
+              <div class="m-body"><div class="m-name">Game-Day Backpack</div><div class="m-sub">Carry · Bookstore accounts</div></div>
+              <div class="m-val"><div class="m-rev">$176K</div><div class="m-vel up">▲ 9%</div></div>
+            </div>
+            <div class="mover">
+              <div class="m-rank">5</div>
+              <div class="m-thumb">🧢</div>
+              <div class="m-body"><div class="m-name">Flat-Brim Snapback</div><div class="m-sub">Structured · Margin slipping</div></div>
+              <div class="m-val"><div class="m-rev">$154K</div><div class="m-vel down">▼ 6%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lower row -->
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Velocity by buyer segment</h3>
+              <div class="sub">Where revenue is concentrating</div>
+            </div>
+            <a class="link">Segments →</a>
+          </div>
+          <div class="seg-row">
+            <div class="seg-item"><div class="seg-top"><b>Collegiate bookstores</b><span class="v">$1.18M · 41%</span></div><div class="track"><div class="fill" style="width:82%"></div></div></div>
+            <div class="seg-item"><div class="seg-top"><b>Team & athletic dealers</b><span class="v">$724K · 25%</span></div><div class="track"><div class="fill" style="width:60%"></div></div></div>
+            <div class="seg-item"><div class="seg-top"><b>Resort & destination</b><span class="v">$498K · 18%</span></div><div class="track"><div class="fill g" style="width:44%"></div></div></div>
+            <div class="seg-item"><div class="seg-top"><b>Corporate / promo</b><span class="v">$316K · 11%</span></div><div class="track"><div class="fill" style="width:30%"></div></div></div>
+            <div class="seg-item"><div class="seg-top"><b>Independent retail</b><span class="v">$142K · 5%</span></div><div class="track"><div class="fill" style="width:14%"></div></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-h">
+            <div>
+              <h3>Recommended merchandising actions</h3>
+              <div class="sub">Ranked by revenue impact</div>
+            </div>
+          </div>
+          <div>
+            <div class="reco">
+              <div class="ric a">📈</div>
+              <div class="rb"><div class="rt">Push <em>Richardson 112</em> restock to 41 trending campuses before week 3</div><div class="rm">Projected +$210K · stockout risk at current velocity</div></div>
+              <button class="rcta">Plan</button>
+            </div>
+            <div class="reco">
+              <div class="ric b">⚠️</div>
+              <div class="rb"><div class="rt">Tighten discount floor on <em>3 Southeast distributors</em></div><div class="rm">Margin leak ~$94K/mo · approvals exceeding policy</div></div>
+              <button class="rcta">Review</button>
+            </div>
+            <div class="reco">
+              <div class="ric c">❄️</div>
+              <div class="rb"><div class="rt">Advance <em>knit beanie</em> allocation into Northeast 2 weeks early</div><div class="rm">Demand signal 31% ahead of forecast curve</div></div>
+              <button class="rcta">Adjust</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var map = {
+    'Demand & Merchandising': 'l2-intelligence-demand.html',
+    'Channel & Partners': 'l2-intelligence-channel.html',
+    'Inventory & Planning': 'l2-intelligence-inventory.html',
+    'Sales Copilot': 'l2-intelligence-copilot.html'
+  };
+  document.querySelectorAll('nav .nav-item').forEach(function (a) {
+    var label = a.textContent.trim();
+    if (map[label]) a.setAttribute('href', map[label]);
+  });
+})();
+</script>
+</body>
+</html>
