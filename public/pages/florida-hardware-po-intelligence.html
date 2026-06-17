@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Order Intelligence - Florida Hardware Revenue Intelligence Platform</title>
+<style>
+  :root{
+    --fh-green:#1d6b3f;--fh-green-dark:#14502f;--fh-green-darker:#0d3a22;
+    --fh-green-50:#eaf3ee;--fh-green-100:#d3e7dc;
+    --ink:#1a2420;--muted:#5d6b64;--hint:#8a958f;
+    --line:#e6ebe8;--line-strong:#cdd6d1;--surface:#f4f7f5;--white:#ffffff;
+    --amber-bg:#fcefd6;--amber-line:#f0cd86;--amber-ink:#7a5210;--amber-strong:#9a6608;
+    --red-ink:#9a3215;--red-bg:#fbe9e2;--good-bg:#e2f1e8;--good-ink:#15643a;
+    --ai:#5a3fb8;--ai-bg:#efebfb;--ai-line:#d8cef4;--ai-ink:#46309a;--ai-deep:#3a2880;
+    --radius:10px;--radius-sm:7px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#eef2f0;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .app{display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{width:236px;flex:0 0 236px;background:var(--fh-green-darker);color:#dfeae3;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .sb-brand{display:flex;align-items:center;gap:11px;padding:20px 18px 18px;}
+  .sb-brand .logo{width:38px;height:38px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .sb-brand .logo svg{width:26px;height:26px;}
+  .sb-brand .name{font-weight:700;font-size:15px;color:#fff;line-height:1.2;}
+  .sb-brand .name span{display:block;font-weight:400;font-size:11px;color:#9bc4ac;margin-top:2px;}
+  .sb-section{font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;color:#6f9a80;padding:16px 20px 7px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13.5px;color:#c4d6cb;cursor:pointer;border-left:3px solid transparent;transition:.12s;}
+  .nav-item svg{width:18px;height:18px;flex:0 0 auto;stroke:currentColor;}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav-item.active{background:rgba(255,255,255,.10);color:#fff;border-left-color:#5fc287;font-weight:600;}
+  .nav-item .badge{margin-left:auto;font-size:10.5px;background:#5fc287;color:#0d3a22;font-weight:700;padding:1px 7px;border-radius:10px;}
+  .nav-item .ai-dot{margin-left:auto;font-size:9.5px;background:#7c5fe0;color:#fff;font-weight:700;padding:1px 6px;border-radius:10px;letter-spacing:.4px;}
+  .sb-foot{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px;}
+  .sb-foot .av{width:34px;height:34px;border-radius:50%;background:#2f7d4f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto;}
+  .sb-foot .who{font-size:12.5px;color:#fff;font-weight:600;line-height:1.25;}
+  .sb-foot .who span{display:block;font-weight:400;font-size:11px;color:#8fb6a0;}
+
+  /* MAIN */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{background:var(--white);border-bottom:1px solid var(--line);padding:13px 26px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:5;}
+  .topbar .crumb{font-size:12.5px;color:var(--hint);}
+  .topbar .crumb b{color:var(--ink);font-weight:600;}
+  .search{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 13px;width:240px;color:var(--hint);font-size:13px;}
+  .search svg{width:16px;height:16px;stroke:var(--hint);flex:0 0 auto;}
+  .ico-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+  .ico-btn svg{width:18px;height:18px;stroke:var(--muted);}
+  .ico-btn .ping{position:absolute;top:7px;right:8px;width:7px;height:7px;background:#e2533a;border-radius:50%;border:1.5px solid #fff;}
+
+  .content{padding:22px 26px 48px;width:100%;}
+
+  /* two-pane: PO detail + AI drill-down */
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;}
+
+  .pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+  .pagehead .ptitle{display:flex;align-items:center;gap:11px;}
+  .pagehead h1{margin:0;font-size:21px;font-weight:700;}
+  .postate{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:11px;letter-spacing:.4px;}
+  .postate.open{background:var(--amber-bg);color:var(--amber-strong);}
+  .pagehead p{margin:5px 0 0;font-size:12.5px;color:var(--muted);}
+  .head-actions{display:flex;gap:8px;}
+  .hbtn{font-size:12px;font-weight:600;padding:8px 13px;border-radius:7px;cursor:pointer;font-family:inherit;border:1px solid var(--line-strong);background:#fff;color:var(--ink);display:flex;align-items:center;gap:6px;}
+  .hbtn svg{width:14px;height:14px;stroke:currentColor;}
+  .hbtn.primary{background:var(--fh-green);color:#fff;border-color:var(--fh-green);}
+  .hbtn:hover{background:var(--surface);}
+  .hbtn.primary:hover{background:var(--fh-green-dark);}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);}
+  .pad{padding:16px 20px;}
+  .sec-title{font-size:13px;font-weight:700;margin:0 0 3px;display:flex;align-items:center;gap:7px;}
+  .sec-sub{font-size:11.5px;color:var(--hint);margin:0 0 0;}
+  .ai-pin{font-size:9.5px;background:var(--ai);color:#fff;font-weight:700;padding:1px 6px;border-radius:9px;letter-spacing:.4px;}
+
+  /* PO META STRIP */
+  .meta-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;background:#fff;}
+  .ms{padding:13px 16px;border-right:1px solid var(--line);}
+  .ms:last-child{border-right:none;}
+  .ms .k{font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:.4px;}
+  .ms .v{font-size:15px;font-weight:700;margin-top:3px;}
+  .ms .v small{font-weight:400;font-size:11.5px;color:var(--muted);}
+
+  /* LINE ITEMS TABLE */
+  .li-wrap{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:var(--surface);color:var(--muted);}
+  th{text-align:right;padding:10px 12px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;}
+  th:first-child{text-align:left;}
+  td{padding:0;border-top:1px solid var(--line);vertical-align:top;}
+  .li-main{display:flex;align-items:flex-start;gap:0;}
+  .li-cells{display:grid;grid-template-columns:2.4fr .7fr 1fr 1fr 1fr .9fr;width:100%;align-items:center;}
+  .li-cells>div{padding:13px 12px;text-align:right;font-size:12.5px;}
+  .li-cells>div:first-child{text-align:left;}
+  .pname{font-weight:600;color:var(--ink);}
+  .psku{font-size:11px;color:var(--hint);margin-top:1px;}
+  .pvend{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px;}
+  .pvend .vchip{background:var(--surface);border:1px solid var(--line);padding:1px 7px;border-radius:5px;font-weight:600;color:var(--ink);}
+  .mg{font-weight:700;}
+  .mg.good{color:var(--good-ink);}.mg.ok{color:var(--amber-strong);}.mg.bad{color:var(--red-ink);}
+  .stk{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;display:inline-block;}
+  .stk.in{background:var(--good-bg);color:var(--good-ink);}
+  .stk.out{background:var(--red-bg);color:var(--red-ink);}
+
+  /* inline insight row under a line item */
+  .li-insight{background:var(--ai-bg);border-top:1px solid var(--ai-line);padding:11px 14px;display:flex;gap:10px;align-items:flex-start;}
+  .li-insight .ic{width:22px;height:22px;border-radius:6px;background:var(--ai);display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px;}
+  .li-insight .ic svg{width:13px;height:13px;stroke:#fff;}
+  .li-insight .it{font-size:12px;color:var(--ai-ink);line-height:1.5;flex:1;}
+  .li-insight .it b{font-weight:700;}
+  .li-insight .swap{font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:6px;background:var(--ai);color:#fff;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;flex:0 0 auto;align-self:center;}
+  .li-insight .swap svg{width:13px;height:13px;stroke:#fff;}
+  .li-insight.amber{background:var(--amber-bg);border-top-color:var(--amber-line);}
+  .li-insight.amber .ic{background:var(--amber-strong);}
+  .li-insight.amber .it{color:var(--amber-ink);}
+
+  /* MARGIN SUMMARY */
+  .totals{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px;}
+  .totrow{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .totrow:last-child{border-bottom:none;}
+  .totrow .tl{color:var(--muted);}
+  .totrow .tv{font-weight:600;}
+  .totrow.grand{font-size:15px;padding-top:12px;}
+  .totrow.grand .tl{color:var(--ink);font-weight:700;}
+  .totrow.grand .tv{font-weight:700;}
+  .totrow .tv.pos{color:var(--good-ink);}
+  .margin-box{background:var(--fh-green-darker);color:#fff;border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;justify-content:center;}
+  .margin-box .ml{font-size:11.5px;color:#9bc4ac;text-transform:uppercase;letter-spacing:.5px;}
+  .margin-box .mv{font-size:34px;font-weight:700;letter-spacing:-1px;margin:2px 0;}
+  .margin-box .md{font-size:12px;color:#bfe0cd;}
+  .margin-box .opt{margin-top:13px;padding-top:13px;border-top:1px solid rgba(255,255,255,.15);font-size:12px;color:#dfeae3;line-height:1.5;}
+  .margin-box .opt b{color:#7fe3a6;font-weight:700;}
+
+  /* AI HISTORICAL COMPARISON */
+  .compare{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:13px;}
+  .cmp{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;}
+  .cmp .cl{font-size:11px;color:var(--muted);}
+  .cmp .cv{font-size:18px;font-weight:700;margin:3px 0 2px;}
+  .cmp .cd{font-size:11px;font-weight:600;}
+  .cmp .cd.up{color:var(--red-ink);}.cmp .cd.down{color:var(--good-ink);}.cmp .cd.flat{color:var(--muted);}
+
+  .ai-callout{background:var(--ai-bg);border:1px solid var(--ai-line);border-radius:var(--radius);padding:13px 15px;margin-top:13px;display:flex;gap:11px;}
+  .ai-callout .sp{width:26px;height:26px;border-radius:7px;background:var(--ai);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .ai-callout .sp svg{width:15px;height:15px;stroke:#fff;}
+  .ai-callout .ct{font-size:12.5px;color:var(--ai-ink);line-height:1.55;}
+  .ai-callout .ct b{font-weight:700;}
+
+  /* RIGHT AI DRILL-DOWN PANEL */
+  .ai-panel{position:sticky;top:80px;background:#fff;border:1px solid var(--ai-line);border-radius:var(--radius);overflow:hidden;}
+  .ai-panel .aph{background:var(--ai);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:9px;}
+  .ai-panel .aph .sp{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .ai-panel .aph .sp svg{width:15px;height:15px;stroke:#fff;}
+  .ai-panel .aph .t{font-size:13.5px;font-weight:700;}
+  .ai-panel .aph .t span{display:block;font-weight:400;font-size:11px;color:#d8cef4;margin-top:1px;}
+  .ai-body{padding:14px 16px;}
+  .ai-msg{background:var(--ai-bg);border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:var(--ai-ink);line-height:1.55;margin-bottom:12px;}
+  .ai-msg b{font-weight:700;}
+  .drill-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);margin:0 0 9px;font-weight:600;}
+  .drill{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:.12s;background:#fff;}
+  .drill:hover{border-color:var(--ai-line);background:var(--ai-bg);}
+  .drill svg{width:15px;height:15px;stroke:var(--ai);flex:0 0 auto;}
+  .drill .dt{font-size:12px;color:var(--ink);font-weight:500;line-height:1.35;}
+  .ai-ask{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:14px;}
+  .ai-ask input{border:none;background:transparent;flex:1;font-size:12.5px;color:var(--ink);outline:none;font-family:inherit;}
+  .ai-ask input::placeholder{color:var(--hint);}
+  .ai-ask .snd{background:var(--ai);width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer;}
+  .ai-ask .snd svg{stroke:#fff;width:14px;height:14px;}
+
+  @media(max-width:1080px){.layout{grid-template-columns:1fr;}.ai-panel{position:static;}}
+  @media(max-width:760px){.sidebar{display:none;}.search{display:none;}.meta-strip,.totals,.compare{grid-template-columns:1fr 1fr;}.li-cells{grid-template-columns:1.6fr .6fr 1fr;}.li-cells>div:nth-child(4),.li-cells>div:nth-child(5){display:none;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#1d6b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2 4 4-12 3 16 2-8h4"/></svg></div>
+      <div class="name">Florida Hardware<span>Revenue Intelligence</span></div>
+    </div>
+    <div class="sb-section">Sell</div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Dashboard</div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>Inventory lookup</div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Vendor intelligence<span class="ai-dot">AI</span></div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>Quotes<span class="badge">5</span></div>
+    <div class="nav-item active"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 12a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2z"/><path d="M16 7a4 4 0 0 0-8 0"/></svg>Purchase orders</div>
+    <div class="sb-section">AI assist</div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M11 7v4l3 2"/></svg>Product alternatives<span class="ai-dot">AI</span></div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8z"/></svg>Freight tracking<span class="ai-dot">AI</span></div>
+    <div class="nav-item"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Service copilot<span class="ai-dot">AI</span></div>
+    <div class="sb-foot">
+      <div class="av">DM</div>
+      <div class="who">Dana Morales<span>Sales &amp; Purchasing</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">Purchase orders &nbsp;/&nbsp; <b>PO #4471</b></div>
+      <div class="search"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>Search POs…</div>
+      <div class="ico-btn"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="ping"></span></div>
+    </div>
+
+    <div class="content">
+
+      <div class="pagehead">
+        <div>
+          <div class="ptitle">
+            <h1>PO #4471</h1>
+            <span class="postate open">OPEN · UNCONFIRMED</span>
+          </div>
+          <p>Coastal Builders Supply · created Mar 6, 2026 · 5 line items · 3 vendors</p>
+        </div>
+        <div class="head-actions">
+          <button class="hbtn"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+          <button class="hbtn primary"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Confirm &amp; send</button>
+        </div>
+      </div>
+
+      <div class="layout">
+
+        <!-- LEFT: PO DETAIL -->
+        <div>
+
+          <!-- META STRIP -->
+          <div class="meta-strip">
+            <div class="ms"><div class="k">Customer</div><div class="v">Coastal Builders <small>net-30</small></div></div>
+            <div class="ms"><div class="k">PO value</div><div class="v">$18,432</div></div>
+            <div class="ms"><div class="k">Blended margin</div><div class="v" style="color:var(--good-ink)">24.6%</div></div>
+            <div class="ms"><div class="k">Est. fulfillment</div><div class="v">9 days <small>1 at risk</small></div></div>
+          </div>
+
+          <!-- LINE ITEMS -->
+          <p class="sec-title" style="margin-bottom:9px;">Line items <span class="ai-pin">AI ENRICHED</span></p>
+          <div class="li-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product / vendor</th><th>Qty</th><th>Unit cost</th><th>Sell</th><th>Ext.</th><th>Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- item 1 - OUT OF STOCK + AI ALT -->
+                <tr>
+                  <td colspan="6">
+                    <div class="li-cells">
+                      <div>
+                        <div class="pname">1/2" Galvanized Steel Pipe - 21 ft</div>
+                        <div class="psku">GP-0512-21 · <span class="stk out">out of stock</span></div>
+                        <div class="pvend">vendor <span class="vchip">Atlas Pipe &amp; Supply</span> · 30% on-time</div>
+                      </div>
+                      <div>40</div>
+                      <div>$22.40</div>
+                      <div>$31.10</div>
+                      <div>$1,244</div>
+                      <div class="mg ok">28.0%</div>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td colspan="6">
+                  <div class="li-insight">
+                    <div class="ic"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg></div>
+                    <div class="it"><b>Atlas is out of stock and slipping (30% on-time).</b> AI found a spec-identical equivalent from Gulf Coast - 214 in stock, ships today, on-time 94%. Cost +$0.27/unit but margin holds at 27.1% and you avoid a 9-day backorder.</div>
+                    <button class="swap"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg>Swap to Gulf Coast</button>
+                  </div>
+                </td></tr>
+
+                <!-- item 2 -->
+                <tr>
+                  <td colspan="6">
+                    <div class="li-cells">
+                      <div>
+                        <div class="pname">3/4" Brass Ball Valve - NPT</div>
+                        <div class="psku">BV-0750-NPT · <span class="stk in">in stock</span></div>
+                        <div class="pvend">vendor <span class="vchip">Gulf Coast Metals</span> · 94% on-time</div>
+                      </div>
+                      <div>60</div>
+                      <div>$8.10</div>
+                      <div>$12.40</div>
+                      <div>$744</div>
+                      <div class="mg good">34.7%</div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- item 3 - margin warning -->
+                <tr>
+                  <td colspan="6">
+                    <div class="li-cells">
+                      <div>
+                        <div class="pname">Galvanized Floor Flange - 1"</div>
+                        <div class="psku">FF-0100-GV · <span class="stk in">in stock</span></div>
+                        <div class="pvend">vendor <span class="vchip">Sunbelt Industrial</span> · 88% on-time</div>
+                      </div>
+                      <div>120</div>
+                      <div>$4.85</div>
+                      <div>$5.60</div>
+                      <div>$672</div>
+                      <div class="mg bad">13.4%</div>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td colspan="6">
+                  <div class="li-insight amber">
+                    <div class="ic"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+                    <div class="it"><b>Margin below your 18% floor.</b> This line is priced 9% under the average sell price on your last 6 POs for this SKU. AI suggests $6.15 sell (still competitive) to recover ~22% margin, or source from Gulf Coast at $4.40 unit cost.</div>
+                    <button class="swap"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Reprice</button>
+                  </div>
+                </td></tr>
+
+                <!-- item 4 -->
+                <tr>
+                  <td colspan="6">
+                    <div class="li-cells">
+                      <div>
+                        <div class="pname">PVC Primer &amp; Cement Kit</div>
+                        <div class="psku">PC-KIT-32 · <span class="stk in">in stock</span></div>
+                        <div class="pvend">vendor <span class="vchip">Gulf Coast Metals</span> · 94% on-time</div>
+                      </div>
+                      <div>200</div>
+                      <div>$6.20</div>
+                      <div>$9.95</div>
+                      <div>$1,990</div>
+                      <div class="mg good">37.7%</div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- item 5 -->
+                <tr>
+                  <td colspan="6">
+                    <div class="li-cells">
+                      <div>
+                        <div class="pname">Pipe Hanger Strap - 100 ft roll</div>
+                        <div class="psku">PH-STRAP-100 · <span class="stk in">in stock</span></div>
+                        <div class="pvend">vendor <span class="vchip">Sunbelt Industrial</span> · 88% on-time</div>
+                      </div>
+                      <div>30</div>
+                      <div>$14.00</div>
+                      <div>$19.50</div>
+                      <div>$585</div>
+                      <div class="mg good">28.2%</div>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TOTALS + MARGIN -->
+          <div class="totals">
+            <div class="card pad">
+              <div class="totrow"><span class="tl">Subtotal (cost)</span><span class="tv">$13,894</span></div>
+              <div class="totrow"><span class="tl">Subtotal (sell)</span><span class="tv">$18,432</span></div>
+              <div class="totrow"><span class="tl">Freight (est.)</span><span class="tv">$340</span></div>
+              <div class="totrow"><span class="tl">Gross profit</span><span class="tv pos">$4,538</span></div>
+              <div class="totrow grand"><span class="tl">PO total</span><span class="tv">$18,772</span></div>
+            </div>
+            <div class="margin-box">
+              <div class="ml">Blended margin</div>
+              <div class="mv">24.6%</div>
+              <div class="md">Gross profit $4,538 across 5 lines</div>
+              <div class="opt"><b>+$214 available:</b> applying the 2 AI recommendations (swap line 1, reprice line 3) lifts blended margin to <b>26.1%</b>.</div>
+            </div>
+          </div>
+
+          <!-- AI HISTORICAL COMPARISON -->
+          <div class="card pad">
+            <p class="sec-title">How this PO compares <span class="ai-pin">AI vs PAST POs</span></p>
+            <p class="sec-sub">Benchmarked against your last 12 POs with Coastal Builders &amp; same SKUs</p>
+            <div class="compare">
+              <div class="cmp">
+                <div class="cl">Blended margin</div>
+                <div class="cv">24.6%</div>
+                <div class="cd down">▼ 2.1 pts below your avg (26.7%)</div>
+              </div>
+              <div class="cmp">
+                <div class="cl">Atlas unit cost</div>
+                <div class="cv">$22.40</div>
+                <div class="cd up">▲ 7% higher than 90-day avg</div>
+              </div>
+              <div class="cmp">
+                <div class="cl">Fulfillment risk</div>
+                <div class="cv">1 line</div>
+                <div class="cd up">▲ above usual (0.3 lines/PO)</div>
+              </div>
+            </div>
+            <div class="ai-callout">
+              <div class="sp"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg></div>
+              <div class="ct"><b>AI summary:</b> this PO is running below your historical norm, driven mostly by the Atlas pipe line - it's out of stock, costs 7% more than usual, and carries the only delivery risk. Re-sourcing that one line to Gulf Coast fixes all three issues at once: clears the backorder, trims cost, and recovers ~1.5 margin points. The floor-flange repricing recovers the rest.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: ASK AI DRILL-DOWN -->
+        <div class="ai-panel">
+          <div class="aph">
+            <div class="sp"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg></div>
+            <div class="t">Ask AI about this PO<span>drill into any line, vendor or number</span></div>
+          </div>
+          <div class="ai-body">
+            <div class="ai-msg"><b>This PO needs 2 decisions.</b> Line 1 (Atlas pipe) is out of stock with delivery risk, and line 3 (floor flange) is below your margin floor. Acting on both adds $214 profit and removes the backorder. Want me to apply both?</div>
+
+            <p class="drill-label">Suggested drill-downs</p>
+            <div class="drill"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg><span class="dt">Show me every line I should re-source for margin or stock</span></div>
+            <div class="drill"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg><span class="dt">Why is Atlas pipe 7% more expensive than last quarter?</span></div>
+            <div class="drill"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="dt">What's the realistic delivery date if I keep Atlas?</span></div>
+            <div class="drill"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="dt">Break down profit by vendor on this PO</span></div>
+            <div class="drill"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 12a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2z"/><path d="M16 7a4 4 0 0 0-8 0"/></svg><span class="dt">Compare to the last PO Coastal Builders placed</span></div>
+
+            <div class="ai-ask">
+              <input placeholder="Ask anything about PO #4471…" />
+              <div class="snd"><svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

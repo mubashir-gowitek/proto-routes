@@ -36,6 +36,12 @@ const pages = [
     description:
       'E-commerce intelligence platform with linked Demand, Channel, Inventory, and Sales Copilot views.',
   },
+  {
+    path: '/florida-hardware-po-intelligence',
+    file: '/pages/florida-hardware-po-intelligence.html',
+    title: 'Florida Hardware — Purchase Order Intelligence',
+    description: 'Florida Hardware revenue intelligence platform for purchase order analysis.',
+  },
 ];
 
 export default pages;
