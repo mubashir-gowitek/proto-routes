@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner Solutions · AI Storefront — Interactive Prototype</title>
+<style>
+  :root{
+    --purple:#5B2D8E; --purple-deep:#3F1E66; --purple-50:#F3EEF9; --purple-100:#E5D9F2; --purple-200:#D2BEEA;
+    --blue:#1C9AD6; --blue-deep:#1278A8; --blue-50:#E7F5FC; --blue-100:#C6E8F7;
+    --ink:#1C2230; --slate:#5A6373; --mute:#8A92A1; --line:#E4E7ED; --line-soft:#EEF0F4;
+    --bg:#F6F7F9; --white:#FFFFFF;
+    --success:#1D9E75; --success-bg:#E4F6EF; --warn:#C9821A; --warn-bg:#FBF1E2;
+    --danger:#C7414B; --danger-bg:#FBEAEC;
+    --radius:14px; --radius-sm:9px;
+    --shadow:0 1px 2px rgba(28,34,48,.04), 0 8px 28px rgba(28,34,48,.06);
+    --shadow-pop:0 12px 40px rgba(28,34,48,.16);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-0.13em;flex-shrink:0;}
+  button{font-family:inherit;cursor:pointer;}
+  input{font-family:inherit;}
+
+  /* ---- App frame ---- */
+  .device{max-width:980px;margin:24px auto;background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;}
+  .chrome{display:flex;align-items:center;gap:8px;padding:11px 16px;background:#FBFBFC;border-bottom:1px solid var(--line-soft);}
+  .dots{display:flex;gap:6px;} .dots span{width:11px;height:11px;border-radius:50%;background:#DDE1E7;}
+  .urlbar{flex:1;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-size:12px;color:var(--mute);display:flex;align-items:center;gap:7px;}
+  .urlbar .ico{font-size:13px;color:var(--success);}
+
+  /* ---- Storefront top nav ---- */
+  .topnav{display:flex;align-items:center;gap:20px;padding:14px 22px;border-bottom:1px solid var(--line-soft);position:relative;}
+  .blogo{display:flex;align-items:baseline;gap:7px;font-weight:700;font-size:18px;color:var(--purple);letter-spacing:-.3px;cursor:pointer;}
+  .blogo .mk{width:19px;height:19px;border-radius:5px;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .blogo .mk .ico{font-size:12px;color:#fff;}
+  .navlinks{display:flex;gap:18px;font-size:13.5px;color:var(--slate);font-weight:500;}
+  .navlinks a{cursor:pointer;padding-bottom:2px;border-bottom:2px solid transparent;}
+  .navlinks a.active{color:var(--purple);border-color:var(--purple);}
+  .navlinks a:hover{color:var(--purple);}
+  .navright{margin-left:auto;display:flex;align-items:center;gap:16px;color:var(--slate);font-size:18px;}
+  .navright .ic{cursor:pointer;position:relative;display:flex;}
+  .cartcount{position:absolute;top:-7px;right:-9px;background:var(--purple);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+  .acctpill{width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+
+  /* ---- Search bar (hero) ---- */
+  .stage{padding:26px 22px 30px;min-height:440px;}
+  .view{display:none;} .view.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .hero h1{font-size:25px;font-weight:700;letter-spacing:-.5px;margin:6px 0 6px;}
+  .hero .sub{font-size:14.5px;color:var(--slate);margin:0 0 20px;}
+  .searchwrap{position:relative;max-width:620px;}
+  .searchbar{display:flex;align-items:center;gap:10px;border:1.5px solid var(--purple-200);border-radius:100px;padding:11px 10px 11px 18px;background:#fff;transition:.15s;}
+  .searchbar:focus-within{border-color:var(--purple);box-shadow:0 0 0 4px var(--purple-50);}
+  .searchbar .ico.lead{font-size:19px;color:var(--mute);}
+  .searchbar input{border:none;outline:none;flex:1;font-size:14.5px;color:var(--ink);background:transparent;}
+  .searchbar .cam{width:36px;height:36px;border-radius:50%;background:var(--purple-50);color:var(--purple);border:none;display:flex;align-items:center;justify-content:center;font-size:17px;transition:.15s;}
+  .searchbar .cam:hover{background:var(--purple-100);}
+  .searchbar .go{width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .ex{font-size:12.5px;color:var(--purple);background:#fff;border:1px solid var(--purple-100);padding:7px 13px;border-radius:100px;cursor:pointer;transition:.12s;}
+  .ex:hover{background:var(--purple-50);}
+
+  .featrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:30px;}
+  .featcard{border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s;background:#fff;}
+  .featcard:hover{border-color:var(--purple-200);transform:translateY(-2px);box-shadow:var(--shadow);}
+  .featcard .fi{width:38px;height:38px;border-radius:10px;background:var(--purple-50);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:11px;}
+  .featcard b{display:block;font-size:14px;font-weight:600;margin-bottom:3px;}
+  .featcard small{font-size:12.5px;color:var(--slate);line-height:1.4;}
+
+  /* ---- Chat / advisor shared ---- */
+  .viewhead{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+  .backbtn{border:1px solid var(--line);background:#fff;border-radius:9px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--slate);}
+  .backbtn:hover{background:var(--bg);}
+  .viewhead .vt{font-size:18px;font-weight:700;letter-spacing:-.3px;}
+  .viewhead .vt small{display:block;font-size:12.5px;color:var(--slate);font-weight:400;}
+  .viewhead .ai{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--success);font-weight:600;}
+  .viewhead .ai::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--success);}
+
+  .chat{display:flex;flex-direction:column;gap:11px;min-height:200px;}
+  .msg{display:flex;}
+  .msg.u{justify-content:flex-end;}
+  .bub{max-width:80%;padding:11px 15px;border-radius:15px;font-size:13.5px;line-height:1.5;}
+  .msg.u .bub{background:var(--purple);color:#fff;border-bottom-right-radius:5px;}
+  .msg.a .bub{background:#F4F5F8;border:1px solid var(--line-soft);border-bottom-left-radius:5px;}
+  .bub b{font-weight:600;}
+  .typing{display:flex;gap:4px;padding:4px 2px;}
+  .typing span{width:7px;height:7px;border-radius:50%;background:var(--mute);animation:bounce 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.15s;} .typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes bounce{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-4px);}}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .chip{font-size:12.5px;color:var(--purple);background:#fff;border:1px solid var(--purple-100);padding:8px 14px;border-radius:100px;cursor:pointer;transition:.12s;}
+  .chip:hover{background:var(--purple-50);}
+
+  .composer{margin-top:16px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:6px 6px 6px 16px;background:#fff;}
+  .composer input{border:none;outline:none;flex:1;font-size:13.5px;background:transparent;}
+  .composer .send{width:34px;height:34px;border-radius:50%;background:var(--purple);color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .composer .send:disabled{background:var(--line);color:var(--mute);}
+
+  /* ---- Product result cards ---- */
+  .results{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+  .pcard{display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;transition:.12s;}
+  .pcard.best{border-color:var(--blue);background:var(--blue-50);}
+  .pthumb{width:46px;height:46px;border-radius:9px;background:var(--purple-50);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--purple);font-size:22px;}
+  .pcard.best .pthumb{background:#fff;color:var(--blue-deep);}
+  .pinfo{flex:1;min-width:0;} .pinfo .nm{font-size:14px;font-weight:600;} .pinfo .sp{font-size:12.5px;color:var(--slate);margin-top:1px;}
+  .pright{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .pright .pr{font-size:15px;font-weight:700;}
+  .badge{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.4px;}
+  .badge.blue{background:var(--blue-50);color:var(--blue-deep);} .badge.green{background:var(--success-bg);color:var(--success);}
+  .addbtn{font-size:12px;font-weight:600;color:#fff;background:var(--purple);border:none;padding:7px 13px;border-radius:7px;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+  .addbtn:hover{background:var(--purple-deep);}
+  .addbtn.added{background:var(--success);} 
+
+  .doclink{font-size:12px;color:var(--blue-deep);display:inline-flex;align-items:center;gap:5px;margin-top:9px;cursor:pointer;}
+  .doclink:hover{text-decoration:underline;}
+  .instock{font-size:11.5px;font-weight:600;color:var(--success);display:inline-flex;align-items:center;gap:4px;}
+
+  /* ---- Photo search ---- */
+  .photo-stage{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:680px){.photo-stage{grid-template-columns:1fr;}}
+  .dropzone{border:2px dashed var(--purple-200);border-radius:var(--radius);background:var(--purple-50);padding:22px;text-align:center;cursor:pointer;transition:.15s;}
+  .dropzone:hover{background:#fff;border-color:var(--purple);}
+  .dropzone .big{width:54px;height:54px;border-radius:14px;background:#fff;color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px;border:1px solid var(--purple-100);}
+  .photo-mock{width:160px;height:124px;border-radius:11px;border:1px solid var(--line);overflow:hidden;background:linear-gradient(160deg,#cfd4dc,#aeb4bf);position:relative;margin:0 auto 12px;}
+  .photo-mock .lk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:48px;}
+  .scan{position:absolute;left:0;right:0;height:3px;background:var(--blue);box-shadow:0 0 12px var(--blue);top:0;animation:scanmove 1.4s ease-in-out infinite;}
+  @keyframes scanmove{0%,100%{top:8%;}50%{top:88%;}}
+  .ident{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;}
+  .ident .r{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;}
+  .ident .r span:first-child{color:var(--slate);} .ident .r span:last-child{font-weight:600;}
+  .confbar{height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;margin-top:5px;}
+  .confbar i{display:block;height:100%;width:0;background:var(--success);border-radius:4px;transition:width .9s ease;}
+
+  /* ---- BOM ---- */
+  .bom-input{background:var(--purple-50);border:1px solid var(--purple-100);border-radius:var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--purple-deep);font-style:italic;display:flex;gap:10px;align-items:flex-start;}
+  .bom-input .ico{color:var(--purple);font-style:normal;font-size:17px;margin-top:1px;}
+  .bom-list{margin-top:14px;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;}
+  .bom-row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line-soft);opacity:0;transform:translateX(-8px);animation:rowin .4s forwards;}
+  @keyframes rowin{to{opacity:1;transform:none;}}
+  .bom-row .ic{width:36px;height:36px;border-radius:8px;background:var(--blue-50);color:var(--blue-deep);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .bom-row .nm{flex:1;} .bom-row .nm b{font-size:13.5px;font-weight:600;display:block;} .bom-row .nm small{font-size:12px;color:var(--slate);}
+  .qty{font-size:12.5px;color:var(--slate);font-weight:600;background:#F4F5F8;padding:4px 10px;border-radius:7px;}
+  .bom-foot{display:flex;align-items:center;justify-content:space-between;padding:15px;background:var(--purple-50);}
+  .bom-foot .tot small{font-size:11.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.5px;font-weight:600;display:block;}
+  .bom-foot .tot b{font-size:21px;font-weight:700;color:var(--purple-deep);}
+  .btn-primary{background:var(--purple);color:#fff;border:none;padding:11px 20px;border-radius:9px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:8px;}
+  .btn-primary:hover{background:var(--purple-deep);}
+
+  /* ---- Compliance ---- */
+  .cart-line{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-soft);}
+  .cart-line .ic{width:38px;height:38px;border-radius:9px;background:var(--purple-50);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .cart-line .nm{flex:1;} .cart-line .nm b{font-size:13.5px;font-weight:600;display:block;} .cart-line .nm small{font-size:12px;color:var(--slate);}
+  .cart-line .pr{font-weight:700;font-size:14px;}
+  .check-result{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .check{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:var(--radius-sm);opacity:0;animation:fade .35s forwards;}
+  .check.pass{background:var(--success-bg);border:1px solid #BFE7D6;}
+  .check.flag{background:var(--warn-bg);border:1px solid #F0DEBC;}
+  .check .ci{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:#fff;}
+  .check.pass .ci{background:var(--success);} .check.flag .ci{background:var(--warn);}
+  .check .cx b{font-size:13.5px;font-weight:600;display:block;} .check .cx small{font-size:12.5px;color:var(--slate);}
+  .check .cx .fixbtn{margin-top:8px;font-size:12.5px;font-weight:600;color:#fff;background:var(--warn);border:none;padding:7px 13px;border-radius:7px;display:inline-flex;align-items:center;gap:6px;}
+  .check .cx .fixbtn:hover{filter:brightness(.95);}
+
+  .empty{text-align:center;color:var(--mute);padding:30px 0;font-size:13.5px;}
+
+  /* ---- Toast ---- */
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:100px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:.3s;z-index:60;box-shadow:var(--shadow-pop);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .ico{color:#7FE3BE;font-size:16px;}
+
+  .hint{font-size:12px;color:var(--mute);margin-top:16px;display:flex;align-items:center;gap:7px;}
+  .hint .ico{color:var(--blue);}
+
+  .caption{max-width:980px;margin:0 auto 30px;padding:0 14px;font-size:13px;color:var(--mute);text-align:center;line-height:1.6;}
+  .caption b{color:var(--slate);font-weight:600;}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-alert-triangle" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v4M10.24 3.957l-8.422 14.06A1.989 1.989 0 0 0 3.520 21h16.96a1.989 1.989 0 0 0 1.702-2.983L13.76 3.957a1.989 1.989 0 0 0-3.52 0zM12 16h.01"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 18l6-6M13 6l6 6"/></symbol>
+<symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M17 7L7 17M8 7h9v9"/></symbol>
+<symbol id="i-arrows-exchange" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10h14l-4-4M17 14H3l4 4"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 3v7h6l-8 11v-7H5z"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 7h2a2 2 0 0 0 2-2 1 1 0 0 1 1-1h4a1 1 0 0 1 1 1 2 2 0 0 0 2 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2"/><circle cx="12" cy="13" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7"/></symbol>
+<symbol id="i-circle-check-filled" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.3-5.4 5.4a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 1 1 1.4-1.4l1.9 1.9 4.7-4.7a1 1 0 1 1 1.4 1.4z"/></symbol>
+<symbol id="i-clipboard-list" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 3h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1M9 12h.01M13 12h2M9 16h.01M13 16h2"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v14H5zM9 9h6v6H9zM3 10h2M3 14h2M19 10h2M19 14h2M10 3v2M14 3v2M10 19v2M14 19v2"/></symbol>
+<symbol id="i-door" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 20V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v16M14 12v.01"/></symbol>
+<symbol id="i-dots-vertical" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM12 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM12 16a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></symbol>
+<symbol id="i-file-certificate" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4M12 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v3M9 12h2M9 16h1M15 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM15 20l-1.5 2.5M15 20l1.5 2.5"/></symbol>
+<symbol id="i-file-description" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM9 17h6M9 13h6"/></symbol>
+<symbol id="i-file-invoice" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM9 7h1M9 13h6M13 17h2"/></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM9 9h1M9 13h6M9 17h6"/></symbol>
+<symbol id="i-file-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM10 12l4 4M14 12l-4 4"/></symbol>
+<symbol id="i-git-compare" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 6H7a1 1 0 0 0-1 1v5M13 18h4a1 1 0 0 0 1-1v-5"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3M3.05 11a9 9 0 1 1 .5 4M3 4v4h4"/></symbol>
+<symbol id="i-info-circle" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8h.01M11 12h1v4h1"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16.5 7.5a2 2 0 1 0 0 .01M15 9l-9 9v3h3l1-1v-2h2v-2h2l1.5-1.5"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 11h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2M8 11V7a4 4 0 1 1 8 0v4M12 16v.01"/></symbol>
+<symbol id="i-lock-square-rounded" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 11V8a3 3 0 0 1 6 0v3M8 11h8a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2M12 14v.01"/></symbol>
+<symbol id="i-package" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5M8 5.25l8 4.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-quote" viewBox="0 0 24 24"><path fill="currentColor" d="M10 11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3 1 1 0 0 1 0 2 1 1 0 0 0-1 1v1h2a3 3 0 0 1 3 3zm10 0a3 3 0 0 1-3 3h-1a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3 1 1 0 0 1 0 2 1 1 0 0 0-1 1v1h2a3 3 0 0 1 3 3z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 11a8 8 0 0 0-14-4L4 9M4 5v4h4M4 13a8 8 0 0 0 14 4l2-2M20 19v-4h-4"/></symbol>
+<symbol id="i-replace" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 3h6v6H3zM15 15h6v6h-6zM21 8a4 4 0 0 0-4-4h-1l2 2M3 16a4 4 0 0 0 4 4h1l-2-2"/></symbol>
+<symbol id="i-rotate-clockwise" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.05 11a8 8 0 1 1 .5 4M4 15v-4h4"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 10m-7 0a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"/></symbol>
+<symbol id="i-shield-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6zM9.5 12l2 2 3.5-3.5"/></symbol>
+<symbol id="i-shopping-cart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 19a1 1 0 1 0 0 .01M17 19a1 1 0 1 0 0 .01M17 17H6V3H4M6 5l14 1-1 7H6"/></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+<symbol id="i-tools" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 21h4L17 11l-4-4L3 17zM14.5 5.5l4 4M12 8l-5 5M16 3l5 5-2 2-5-5z"/></symbol>
+<symbol id="i-trending-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8M14 7h7v7"/></symbol>
+<symbol id="i-trending-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 7l6 6 4-4 8 8M14 17h7v-7"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></symbol>
+<symbol id="i-wand" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21l15-15-3-3L3 18zM15 6l3 3M9 3l.5 1.5L11 5l-1.5.5L9 7l-.5-1.5L7 5l1.5-.5zM19 13l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4z"/></symbol>
+<symbol id="i-briefcase" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 8h16a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a1 1 0 0 1 1-1M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M19 21V11a1 1 0 0 0-1-1h-3M3 21h18M9 8h2M9 12h2M9 16h2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 3"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></symbol>
+<symbol id="i-map-pin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 9c0 5-5 11-5 11S7 14 7 9a5 5 0 0 1 10 0z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8L3.6 9.1l5.8-.8z"/></symbol>
+<symbol id="i-mood-happy" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 10h.01M15 10h.01M9.5 15a3.5 3.5 0 0 0 5 0"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h.01"/></symbol>
+<symbol id="i-mood-sad" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 10h.01M15 10h.01M9.5 16a3.5 3.5 0 0 1 5 0"/></symbol>
+<symbol id="i-checklist" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6h11M9 12h11M9 18h11M5 6l-1 1-1-1M5 12l-1 1-1-1M5 18l-1 1-1-1"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 18a2 2 0 1 0 0 .01M17 18a2 2 0 1 0 0 .01M5 17H3V6a1 1 0 0 1 1-1h10v12M9 17h6M14 9h4l3 3v5h-2"/></symbol>
+<symbol id="i-message" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 9h8M8 13h6M18 4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 14l11-11M21 3l-6.5 18a.55.55 0 0 1-1 0L10 14l-7-3.5a.55.55 0 0 1 0-1z"/></symbol>
+<symbol id="i-photo-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8M3 16v2a3 3 0 0 0 3 3h8M3 16l4-4c.9-.86 2.1-.86 3 0l3 3M14 14l1-1c.9-.86 2.1-.86 3 0M19 16v6M16 19h6"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-loader" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
+<symbol id="i-message-2" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 20l-3-3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-3z"/></symbol>
+<symbol id="i-circle-dot" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></symbol>
+<symbol id="i-arrow-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 11l-4 4 4 4M5 15h11a4 4 0 0 0 0-8h-1"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12H3l9-9 9 9h-2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M9 21v-6h6v6"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 16V8l-9-5-9 5v8l9 5zM3 8l9 5 9-5M12 13v8"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6h11M9 12h11M9 18h11M5 6v.01M5 12v.01M5 18v.01"/></symbol>
+<symbol id="i-tool" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10h3V7L6.5 3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1-3 3l-6-6a6 6 0 0 1-8-8z"/></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 12l2 2 4-4"/></symbol>
+</svg>
+
+<div class="device">
+  <div class="chrome">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="urlbar"><svg class="ico"><use href="#i-lock"></use></svg> <span id="url">bannersolutions.com</span></div>
+  </div>
+
+  <div class="topnav">
+    <div class="blogo" onclick="go('home')">banner<span class="mk"><svg class="ico"><use href="#i-arrow-up-right"></use></svg></span></div>
+    <div class="navlinks">
+      <a id="nav-home" class="active" onclick="go('home')">Home</a>
+      <a id="nav-bom" onclick="go('bom')">Project builder</a>
+      <a onclick="toast('Catalog is part of the live site')">Catalog</a>
+      <a onclick="toast('Brands is part of the live site')">Brands</a>
+    </div>
+    <div class="navright">
+      <span class="ic" onclick="go('knowledge')" title="Ask"><svg class="ico"><use href="#i-message-2"></use></svg></span>
+      <span class="ic" onclick="go('cart')" title="Cart"><svg class="ico"><use href="#i-shopping-cart"></use></svg><span class="cartcount" id="cartcount" style="display:none">0</span></span>
+      <span class="acctpill">MR</span>
+    </div>
+  </div>
+
+  <div class="stage">
+
+    <!-- ===== HOME ===== -->
+    <div class="view active" id="v-home">
+      <div class="hero">
+        <h1>What are you working on?</h1>
+        <p class="sub">Describe a project, a problem, or an opening — not a part number. The advisor figures out the rest.</p>
+        <div class="searchwrap">
+          <div class="searchbar">
+            <svg class="ico lead"><use href="#i-search"></use></svg>
+            <input id="homeSearch" placeholder="e.g. panic hardware for a school exit door" onkeydown="if(event.key==='Enter')startDiscovery(this.value)">
+            <button class="cam" title="Search by photo" onclick="go('photo')"><svg class="ico"><use href="#i-camera"></use></svg></button>
+            <button class="go" onclick="startDiscovery(document.getElementById('homeSearch').value)"><svg class="ico"><use href="#i-arrow-right"></use></svg></button>
+          </div>
+          <div class="examples">
+            <span class="ex" onclick="startDiscovery('panic hardware for a K-12 school exit door')">panic hardware for a school exit door</span>
+            <span class="ex" onclick="startDiscovery('weatherproof lock for an exterior gate')">weatherproof lock for an exterior gate</span>
+            <span class="ex" onclick="go('photo')"><svg class="ico" style="font-size:13px;vertical-align:-1px"><use href="#i-camera"></use></svg> search by photo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="featrow">
+        <div class="featcard" onclick="go('photo')">
+          <div class="fi"><svg class="ico"><use href="#i-camera"></use></svg></div>
+          <b>Search by photo</b><small>Snap a part, find the match</small>
+        </div>
+        <div class="featcard" onclick="go('knowledge')">
+          <div class="fi"><svg class="ico"><use href="#i-message-2"></use></svg></div>
+          <b>Ask a question</b><small>Specs, compatibility, codes</small>
+        </div>
+        <div class="featcard" onclick="go('bom')">
+          <div class="fi"><svg class="ico"><use href="#i-clipboard-list"></use></svg></div>
+          <b>Build a project quote</b><small>Whole solution, one prompt</small>
+        </div>
+        <div class="featcard" onclick="go('cart')">
+          <div class="fi"><svg class="ico"><use href="#i-shield-check"></use></svg></div>
+          <b>Check compliance</b><small>Fire, ADA &amp; ANSI in cart</small>
+        </div>
+      </div>
+      <div class="hint"><svg class="ico"><use href="#i-circle-dot"></use></svg> This is a clickable prototype — try the search bar, the cards, or the nav. Everything responds.</div>
+    </div>
+
+    <!-- ===== DISCOVERY ===== -->
+    <div class="view" id="v-discovery">
+      <div class="viewhead">
+        <button class="backbtn" onclick="go('home')"><svg class="ico"><use href="#i-arrow-back"></use></svg></button>
+        <div class="vt">Product discovery advisor<small>Describe the need — get the right products</small></div>
+        <div class="ai">AI</div>
+      </div>
+      <div class="chat" id="discoChat"></div>
+      <div class="composer">
+        <input id="discoInput" placeholder="Reply to the advisor…" onkeydown="if(event.key==='Enter')discoSend(this.value)">
+        <button class="send" onclick="discoSend(document.getElementById('discoInput').value)"><svg class="ico"><use href="#i-send"></use></svg></button>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="view" id="v-photo">
+      <div class="viewhead">
+        <button class="backbtn" onclick="go('home')"><svg class="ico"><use href="#i-arrow-back"></use></svg></button>
+        <div class="vt">Search by photo<small>Snap a part — we identify it and find the match</small></div>
+        <div class="ai" id="photoStatus" style="display:none">Identifying</div>
+      </div>
+      <div class="photo-stage">
+        <div id="photoLeft">
+          <div class="dropzone" id="dropzone" onclick="runPhoto()">
+            <div class="big"><svg class="ico"><use href="#i-photo-up"></use></svg></div>
+            <div style="font-size:14px;font-weight:600;color:var(--purple-deep);">Tap to take or upload a photo</div>
+            <div style="font-size:12.5px;color:var(--slate);margin-top:3px;">Lock, hinge, closer, exit device…</div>
+          </div>
+        </div>
+        <div id="photoRight"></div>
+      </div>
+    </div>
+
+    <!-- ===== KNOWLEDGE ===== -->
+    <div class="view" id="v-knowledge">
+      <div class="viewhead">
+        <button class="backbtn" onclick="go('home')"><svg class="ico"><use href="#i-arrow-back"></use></svg></button>
+        <div class="vt">Ask Banner<small>Technical answers, backed by documentation</small></div>
+        <div class="ai">AI</div>
+      </div>
+      <div class="chat" id="knowChat"></div>
+      <div class="composer">
+        <input id="knowInput" placeholder="Ask about specs, compatibility, codes…" onkeydown="if(event.key==='Enter')knowSend(this.value)">
+        <button class="send" onclick="knowSend(document.getElementById('knowInput').value)"><svg class="ico"><use href="#i-send"></use></svg></button>
+      </div>
+    </div>
+
+    <!-- ===== BOM ===== -->
+    <div class="view" id="v-bom">
+      <div class="viewhead">
+        <button class="backbtn" onclick="go('home')"><svg class="ico"><use href="#i-arrow-back"></use></svg></button>
+        <div class="vt">Project builder<small>Describe the opening — get a quote-ready bill of materials</small></div>
+        <div class="ai">AI</div>
+      </div>
+      <div id="bomStart">
+        <div class="bom-input" style="cursor:default;">
+          <svg class="ico"><use href="#i-quote"></use></svg>
+          <span style="font-style:normal;color:var(--slate);">Try a project prompt:</span>
+        </div>
+        <div class="chips" style="margin-top:12px;">
+          <span class="chip" onclick="runBom('4 commercial aluminum storefront entrances — fire-rated, ADA, with access control')">4 storefront entrances, fire-rated + ADA + access control</span>
+          <span class="chip" onclick="runBom('hardware for 6 classroom doors with classroom-function locks')">6 classroom doors</span>
+        </div>
+        <div class="composer" style="margin-top:18px;">
+          <input id="bomInput" placeholder="…or describe your own project" onkeydown="if(event.key==='Enter')runBom(this.value)">
+          <button class="send" onclick="runBom(document.getElementById('bomInput').value)"><svg class="ico"><use href="#i-send"></use></svg></button>
+        </div>
+      </div>
+      <div id="bomResult"></div>
+    </div>
+
+    <!-- ===== CART / COMPLIANCE ===== -->
+    <div class="view" id="v-cart">
+      <div class="viewhead">
+        <button class="backbtn" onclick="go('home')"><svg class="ico"><use href="#i-arrow-back"></use></svg></button>
+        <div class="vt">Your cart<small>Review items, then check compliance before checkout</small></div>
+      </div>
+      <div id="cartBody"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="caption">
+  <b>Interactive prototype</b> · Banner Solutions AI storefront concept by Gowitek. Every feature is clickable and responds in real time — this is the end-user experience, not a slide. Product data is illustrative.
+</div>
+
+<div class="toast" id="toast"><svg class="ico"><use href="#i-check"></use></svg> <span id="toastMsg">Added</span></div>
+
+<script>
+/* ===================== Banner AI storefront — app logic ===================== */
+const CART = [];
+
+/* ---------- navigation ---------- */
+const URLS = {
+  home:'bannersolutions.com',
+  discovery:'bannersolutions.com/find',
+  photo:'bannersolutions.com/visual-search',
+  knowledge:'bannersolutions.com/ask',
+  bom:'bannersolutions.com/project-builder',
+  cart:'bannersolutions.com/cart'
+};
+function go(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById('v-'+view);
+  if(el) el.classList.add('active');
+  document.getElementById('url').textContent=URLS[view]||URLS.home;
+  document.querySelectorAll('.navlinks a').forEach(a=>a.classList.remove('active'));
+  if(view==='home') document.getElementById('nav-home').classList.add('active');
+  if(view==='bom') document.getElementById('nav-bom').classList.add('active');
+  if(view==='discovery') initDiscovery();
+  if(view==='photo') resetPhoto();
+  if(view==='knowledge') initKnowledge();
+  if(view==='cart') renderCart();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ---------- cart helpers ---------- */
+function addToCart(item,btn){
+  CART.push(item);
+  const c=document.getElementById('cartcount');
+  c.style.display='flex'; c.textContent=CART.length;
+  if(btn){ btn.classList.add('added'); btn.innerHTML='<svg class="ico"><use href="#i-check"></use></svg> Added'; }
+  toast(item.nm+' added to cart');
+}
+function icon(name){ return '<svg class="ico"><use href="#i-'+name+'"></use></svg>'; }
+function esc(s){ return (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ---------- typing indicator ---------- */
+function typingBubble(){
+  return '<div class="msg a" data-typing="1"><div class="bub"><div class="typing"><span></span><span></span><span></span></div></div></div>';
+}
+function appendMsg(container, role, html){
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML='<div class="bub">'+html+'</div>';
+  container.appendChild(div);
+  container.parentElement && container.scrollIntoView;
+  div.scrollIntoView({block:'nearest'});
+  return div;
+}
+function showTyping(container){
+  const wrap=document.createElement('div');
+  wrap.innerHTML=typingBubble();
+  const node=wrap.firstChild;
+  container.appendChild(node);
+  node.scrollIntoView({block:'nearest'});
+  return node;
+}
+
+/* ===================== 1. DISCOVERY ADVISOR ===================== */
+let discoState=0, discoNeed='';
+function initDiscovery(){
+  const chat=document.getElementById('discoChat');
+  if(chat.dataset.init) return;
+  chat.dataset.init='1';
+}
+function startDiscovery(text){
+  if(!text || !text.trim()){ toast('Try describing what you need'); return; }
+  go('discovery');
+  const chat=document.getElementById('discoChat');
+  chat.innerHTML=''; chat.dataset.init='1';
+  discoState=1; discoNeed=text.trim();
+  appendMsg(chat,'u',esc(discoNeed));
+  const typing=showTyping(chat);
+  setTimeout(()=>{
+    typing.remove();
+    appendMsg(chat,'a','Good — a few code-driven details so I surface exactly the right hardware. Is the opening <b>fire-rated</b>, and do you need <b>delayed egress</b> for security?');
+    const chips=document.createElement('div');
+    chips.className='chips';
+    chips.innerHTML=
+      '<span class="chip" onclick="discoAnswer(\'Yes — fire-rated, and we want delayed egress\')">Fire-rated + delayed egress</span>'+
+      '<span class="chip" onclick="discoAnswer(\'Fire-rated, no delayed egress needed\')">Fire-rated only</span>'+
+      '<span class="chip" onclick="discoAnswer(\'Not fire-rated, standard exit\')">Standard exit</span>';
+    chat.appendChild(chips);
+    chips.scrollIntoView({block:'nearest'});
+  },1100);
+}
+function discoAnswer(text){
+  const chat=document.getElementById('discoChat');
+  const oldChips=chat.querySelector('.chips'); if(oldChips) oldChips.remove();
+  appendMsg(chat,'u',esc(text));
+  const typing=showTyping(chat);
+  setTimeout(()=>{
+    typing.remove();
+    appendMsg(chat,'a','Here are the right matches — fire-rated, ANSI Grade 1, with compatible trim and documentation:');
+    renderDiscoResults(chat);
+  },1200);
+}
+function discoSend(text){
+  const input=document.getElementById('discoInput'); input.value='';
+  if(!text || !text.trim()) return;
+  discoAnswer(text.trim());
+}
+function renderDiscoResults(chat){
+  const products=[
+    {nm:'Von Duprin 99 Series exit device',sp:'Fire-rated · Grade 1 · delayed egress',pr:'$642',tag:'Best fit',best:true},
+    {nm:'LCN 4040XP door closer',sp:'Matched for fire-rated opening',pr:'$214',tag:'Pairs'},
+    {nm:'Schlage L-Series mortise lock',sp:'Code-compliant trim · 626',pr:'$284',tag:'Pairs'}
+  ];
+  const wrap=document.createElement('div');
+  wrap.className='results';
+  products.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='pcard'+(p.best?' best':'');
+    card.innerHTML=
+      '<div class="pthumb">'+icon(p.best?'door':'tool')+'</div>'+
+      '<div class="pinfo"><div class="nm">'+p.nm+'</div><div class="sp">'+p.sp+'</div>'+
+        '<div class="doclink" onclick="toast(\'Opening spec sheet (PDF)\')">'+icon('file-text')+' Spec sheet</div></div>'+
+      '<div class="pright"><div class="pr">'+p.pr+'</div>'+
+        '<span class="badge '+(p.best?'blue':'green')+'">'+p.tag+'</span>'+
+        '<button class="addbtn">'+icon('plus')+' Add</button></div>';
+    card.querySelector('.addbtn').onclick=function(){ addToCart(p,this); };
+    wrap.appendChild(card);
+  });
+  chat.appendChild(wrap);
+  const chips=document.createElement('div');
+  chips.className='chips';
+  chips.innerHTML=
+    '<span class="chip" onclick="discoFollow(\'bundle\')">Add the full storefront bundle</span>'+
+    '<span class="chip" onclick="go(\'cart\')">Go to cart &amp; check compliance</span>';
+  chat.appendChild(chips);
+  chips.scrollIntoView({block:'nearest'});
+}
+function discoFollow(kind){
+  const chat=document.getElementById('discoChat');
+  const oldChips=chat.querySelector('.chips:last-of-type'); if(oldChips) oldChips.remove();
+  if(kind==='bundle'){
+    appendMsg(chat,'u','Add the full storefront bundle');
+    const typing=showTyping(chat);
+    setTimeout(()=>{ typing.remove();
+      appendMsg(chat,'a','Done — I added the complete compatibility-checked set (exit device, closer, lock, and access control) to your cart. Want to validate it against code before checkout?');
+      [{nm:'Von Duprin 99 Series exit device'},{nm:'LCN 4040XP door closer'},{nm:'Schlage L-Series mortise lock'},{nm:'HID multiCLASS SE reader'}].forEach(p=>CART.push(p));
+      const c=document.getElementById('cartcount'); c.style.display='flex'; c.textContent=CART.length;
+      toast('Bundle added — 4 items');
+      const chips=document.createElement('div'); chips.className='chips';
+      chips.innerHTML='<span class="chip" onclick="go(\'cart\')">Check compliance now</span>';
+      chat.appendChild(chips); chips.scrollIntoView({block:'nearest'});
+    },1200);
+  }
+}
+
+/* ===================== 2. PHOTO SEARCH ===================== */
+function resetPhoto(){
+  document.getElementById('photoLeft').innerHTML=
+    '<div class="dropzone" id="dropzone" onclick="runPhoto()">'+
+      '<div class="big">'+icon('photo-up')+'</div>'+
+      '<div style="font-size:14px;font-weight:600;color:var(--purple-deep);">Tap to take or upload a photo</div>'+
+      '<div style="font-size:12.5px;color:var(--slate);margin-top:3px;">Lock, hinge, closer, exit device…</div>'+
+    '</div>';
+  document.getElementById('photoRight').innerHTML='';
+  document.getElementById('photoStatus').style.display='none';
+}
+function runPhoto(){
+  document.getElementById('photoLeft').innerHTML=
+    '<div class="photo-mock"><div class="lk">'+icon('lock-square-rounded')+'</div><div class="scan"></div></div>'+
+    '<div style="text-align:center;font-size:13px;color:var(--purple-deep);font-weight:600;">Analyzing hardware…</div>'+
+    '<div style="text-align:center;font-size:12px;color:var(--slate);margin-top:2px;">Matching against 40,000+ catalog SKUs</div>';
+  document.getElementById('photoStatus').style.display='flex';
+  document.getElementById('photoRight').innerHTML='';
+  setTimeout(showPhotoResult,1900);
+}
+function showPhotoResult(){
+  document.getElementById('photoStatus').textContent='Identified';
+  const right=document.getElementById('photoRight');
+  right.innerHTML=
+    '<div class="ident">'+
+      '<div class="r"><span>Detected type</span><span>Mortise lockset</span></div>'+
+      '<div class="r"><span>Likely brand</span><span>Schlage L-Series</span></div>'+
+      '<div class="r"><span>Finish</span><span>Satin chrome (626)</span></div>'+
+      '<div class="r"><span>Confidence</span><span style="color:var(--success)">92%</span></div>'+
+      '<div class="confbar"><i id="cbar"></i></div>'+
+    '</div>'+
+    '<div class="results" id="photoResults"></div>';
+  setTimeout(()=>{ const b=document.getElementById('cbar'); if(b) b.style.width='92%'; },80);
+  const items=[
+    {nm:'Schlage L9080 · 626',sp:'Exact match · ships today',pr:'$284',tag:'Exact',best:true},
+    {nm:'Best 45H-7D · 626',sp:'Equivalent · same function',pr:'$212',tag:'Save $72'}
+  ];
+  const res=document.getElementById('photoResults');
+  items.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='pcard'+(p.best?' best':'');
+    card.innerHTML=
+      '<div class="pthumb">'+icon('lock-square-rounded')+'</div>'+
+      '<div class="pinfo"><div class="nm">'+p.nm+'</div><div class="sp">'+p.sp+'</div>'+
+        '<span class="instock">'+icon('circle-check')+' In stock</span></div>'+
+      '<div class="pright"><div class="pr">'+p.pr+'</div>'+
+        '<span class="badge '+(p.best?'blue':'green')+'">'+p.tag+'</span>'+
+        '<button class="addbtn">'+icon('plus')+' Add</button></div>';
+    card.querySelector('.addbtn').onclick=function(){ addToCart(p,this); };
+    res.appendChild(card);
+  });
+  const retry=document.createElement('div');
+  retry.className='chips'; retry.style.marginTop='12px';
+  retry.innerHTML='<span class="chip" onclick="resetPhoto()">'+icon('refresh')+' Try another photo</span>';
+  right.appendChild(retry);
+}
+
+/* ===================== 3. KNOWLEDGE ADVISOR ===================== */
+const KNOW = [
+  {q:/fire.?rated|fire rating/i,
+   a:'Yes — the Von Duprin 99 Series carries a <b>3-hour fire label</b>, so it\u2019s valid for fire-rated openings up to that rating. Just confirm the door and frame are also labeled for the same rating.',
+   src:'Von Duprin 99 Series — fire listing'},
+  {q:/ansi|grade 1/i,
+   a:'<b>ANSI Grade 1</b> is the highest commercial durability rating from ANSI/BHMA — built for high-traffic, high-security openings (schools, hospitals, public buildings). Grade 2 and 3 are progressively lighter duty.',
+   src:'ANSI/BHMA A156.3 standard'},
+  {q:/ada|opening force|accessible/i,
+   a:'For an accessible route, interior door opening force can\u2019t exceed <b>5 lbf</b>. Use an ADA-rated adjustable closer like the LCN 4040XP and set the spring power to meet the limit for the door width.',
+   src:'ADA Standards §404.2.9'},
+  {q:/compatib|work with my door|fit/i,
+   a:'Compatibility comes down to door thickness, backset, and prep. If you tell me the door type (or snap a photo), I\u2019ll confirm the right trim and prep — most L-Series mortise locks fit standard 1\u00be" commercial doors.',
+   src:'Schlage L-Series template guide'}
+];
+function initKnowledge(){
+  const chat=document.getElementById('knowChat');
+  if(chat.dataset.init) return;
+  chat.dataset.init='1';
+  appendMsg(chat,'a','Ask me anything about specs, compatibility, codes, or documentation. For example:');
+  const chips=document.createElement('div'); chips.className='chips';
+  chips.innerHTML=
+    '<span class="chip" onclick="knowSend(\'Can this be used on a fire-rated opening?\')">Fire-rated opening?</span>'+
+    '<span class="chip" onclick="knowSend(\'What does ANSI Grade 1 mean?\')">What\u2019s ANSI Grade 1?</span>'+
+    '<span class="chip" onclick="knowSend(\'What is the ADA opening force limit?\')">ADA opening force?</span>';
+  chat.appendChild(chips);
+}
+function knowSend(text){
+  const input=document.getElementById('knowInput'); if(input) input.value='';
+  if(!text || !text.trim()) return;
+  const chat=document.getElementById('knowChat');
+  const oldChips=chat.querySelector('.chips'); if(oldChips) oldChips.remove();
+  appendMsg(chat,'u',esc(text.trim()));
+  const typing=showTyping(chat);
+  setTimeout(()=>{
+    typing.remove();
+    const hit=KNOW.find(k=>k.q.test(text)) || {
+      a:'Good question. In the live system I\u2019d answer from Banner\u2019s full product and manufacturer documentation. For this demo, try asking about <b>fire ratings</b>, <b>ANSI grades</b>, <b>ADA opening force</b>, or <b>compatibility</b>.',
+      src:null};
+    let html=hit.a;
+    if(hit.src) html+='<div class="doclink" onclick="toast(\'Opening: '+hit.src.replace(/'/g,"")+'\')">'+icon('file-text')+' Source: '+hit.src+'</div>';
+    appendMsg(chat,'a',html);
+  },1100);
+}
+
+/* ===================== 4. PROJECT / BOM BUILDER ===================== */
+function runBom(text){
+  if(!text || !text.trim()){ toast('Describe a project to build'); return; }
+  const input=document.getElementById('bomInput'); if(input) input.value='';
+  document.getElementById('bomStart').style.display='none';
+  const out=document.getElementById('bomResult');
+  out.innerHTML=
+    '<div class="bom-input">'+icon('quote')+'<span>'+esc(text.trim())+'</span></div>'+
+    '<div style="display:flex;align-items:center;gap:8px;margin-top:14px;color:var(--slate);font-size:13px;">'+
+      '<div class="typing"><span></span><span></span><span></span></div> Building your bill of materials…</div>';
+  setTimeout(renderBom,1500);
+}
+function renderBom(){
+  const lines=[
+    {ic:'lock',nm:'Von Duprin 99 Series exit device',sp:'Fire-rated · Grade 1 · rim type',qty:4},
+    {ic:'door',nm:'LCN 4040XP door closer',sp:'ADA-compliant spring power',qty:4},
+    {ic:'key',nm:'Schlage L-Series mortise lock',sp:'Storeroom function · 626 finish',qty:4},
+    {ic:'cpu',nm:'HID multiCLASS SE reader',sp:'Electronic access control',qty:4},
+    {ic:'tool',nm:'Mounting & trim package',sp:'Strikes, fasteners, thresholds',qty:4}
+  ];
+  const out=document.getElementById('bomResult');
+  let rows='';
+  lines.forEach((l,i)=>{
+    rows+='<div class="bom-row" style="animation-delay:'+(i*0.12)+'s">'+
+      '<div class="ic">'+icon(l.ic)+'</div>'+
+      '<div class="nm"><b>'+l.nm+'</b><small>'+l.sp+'</small></div>'+
+      '<span class="qty">\u00d7'+l.qty+'</span></div>';
+  });
+  out.innerHTML=
+    '<div class="bom-list">'+rows+
+      '<div class="bom-foot"><div class="tot"><small>Estimated project total</small><b>$11,840</b></div>'+
+      '<button class="btn-primary" onclick="bomToCart()">'+icon('shopping-cart')+' Add all to cart</button></div>'+
+    '</div>'+
+    '<div class="hint">'+icon('shield-check')+' Every line is compatibility-checked against the others before the quote is built.</div>'+
+    '<div class="chips" style="margin-top:14px;">'+
+      '<span class="chip" onclick="resetBom()">'+icon('refresh')+' Build another project</span>'+
+      '<span class="chip" onclick="toast(\'Quote PDF generated\')">'+icon('file-text')+' Generate quote PDF</span>'+
+    '</div>';
+}
+function bomToCart(){
+  [{nm:'Von Duprin 99 Series exit device'},{nm:'LCN 4040XP door closer'},{nm:'Schlage L-Series mortise lock'},{nm:'HID multiCLASS SE reader'}].forEach(p=>CART.push(p));
+  const c=document.getElementById('cartcount'); c.style.display='flex'; c.textContent=CART.length;
+  toast('Project bundle added to cart');
+  go('cart');
+}
+function resetBom(){
+  document.getElementById('bomStart').style.display='block';
+  document.getElementById('bomResult').innerHTML='';
+}
+
+/* ===================== 5. CART + COMPLIANCE ===================== */
+function renderCart(){
+  const body=document.getElementById('cartBody');
+  if(CART.length===0){
+    body.innerHTML='<div class="empty">'+icon('shopping-cart')+'<div style="margin-top:8px;">Your cart is empty.</div>'+
+      '<div style="margin-top:14px;"><button class="btn-primary" onclick="go(\'home\')">Start with the advisor</button></div></div>';
+    return;
+  }
+  const seed=[
+    {ic:'lock',nm:'Von Duprin 99 Series exit device',sp:'Fire-rated · Grade 1',pr:'$642'},
+    {ic:'door',nm:'LCN 4040XP door closer',sp:'Spring size 4',pr:'$214'},
+    {ic:'key',nm:'Schlage L-Series mortise lock',sp:'Storeroom · 626',pr:'$284'}
+  ];
+  let lines='';
+  seed.forEach(l=>{
+    lines+='<div class="cart-line"><div class="ic">'+icon(l.ic)+'</div>'+
+      '<div class="nm"><b>'+l.nm+'</b><small>'+l.sp+'</small></div>'+
+      '<div class="pr">'+l.pr+'</div></div>';
+  });
+  body.innerHTML=
+    lines+
+    '<div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:16px;">'+
+      '<button class="btn-primary" id="checkBtn" onclick="runCompliance()">'+icon('shield-check')+' Check compliance</button>'+
+    '</div>'+
+    '<div id="complianceOut" style="margin-top:18px;"></div>';
+}
+function runCompliance(){
+  const btn=document.getElementById('checkBtn');
+  btn.disabled=true; btn.style.opacity='.6';
+  btn.innerHTML='<div class="typing" style="padding:0"><span></span><span></span><span></span></div> Checking…';
+  const out=document.getElementById('complianceOut');
+  out.innerHTML='';
+  const checks=[
+    {cls:'pass',ic:'check',t:'Fire rating — passed',d:'Von Duprin 99 exit device carries a 3-hour fire label, valid for this opening type.'},
+    {cls:'pass',ic:'check',t:'ANSI grade — passed',d:'All locking hardware in cart is ANSI/BHMA Grade 1, suitable for high-traffic use.'},
+    {cls:'flag',ic:'alert-triangle',t:'ADA clearance — review needed',d:'Selected closer spring power (size 4) may exceed the 5 lbf opening-force limit for accessible routes.',fix:true}
+  ];
+  setTimeout(()=>{
+    btn.style.display='none';
+    const result=document.createElement('div');
+    result.className='check-result';
+    out.appendChild(result);
+    checks.forEach((c,i)=>{
+      setTimeout(()=>{
+        const div=document.createElement('div');
+        div.className='check '+c.cls;
+        div.innerHTML='<div class="ci">'+icon(c.ic)+'</div>'+
+          '<div class="cx"><b>'+c.t+'</b><small>'+c.d+'</small>'+
+          (c.fix?'<button class="fixbtn" onclick="applyFix(this)">'+icon('wand')+' Apply suggested fix: LCN 4040XP adjustable</button>':'')+'</div>';
+        result.appendChild(div);
+        div.scrollIntoView({block:'nearest'});
+      }, i*450);
+    });
+  },900);
+}
+function applyFix(btn){
+  const card=btn.closest('.check');
+  card.className='check pass';
+  card.querySelector('.ci').innerHTML=icon('check');
+  card.querySelector('.cx').innerHTML='<b>ADA clearance — passed</b><small>Switched to LCN 4040XP adjustable (ADA-rated). Cart now meets accessible-route opening force.</small>';
+  toast('Fix applied — cart is compliant');
+  const out=document.getElementById('complianceOut');
+  const done=document.createElement('div');
+  done.style.cssText='margin-top:14px;display:flex;justify-content:flex-end;';
+  done.innerHTML='<button class="btn-primary" onclick="toast(\'Proceeding to checkout — order will pass inspection\')">'+icon('check')+' Checkout with confidence</button>';
+  out.appendChild(done);
+  done.scrollIntoView({block:'nearest'});
+}
+
+/* ---------- boot ---------- */
+go('home');
+
+</script>
+</body>
+</html>

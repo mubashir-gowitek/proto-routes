@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICICI Prudential · Preventive Maintenance — Facility Manager Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+  :root{
+    --pru-red:#B02A30;        /* ICICI cherry red (primary) */
+    --pru-red-dark:#8A1F24;
+    --pru-saffron:#F99D27;    /* saffron accent */
+    --pru-blue:#1A3D6D;       /* deep blue secondary */
+    --pru-blue-deep:#0E2746;
+    --ink:#1c2230;
+    --muted:#6b7280;
+    --hint:#9aa1ad;
+    --line:#e7e9ee;
+    --surface:#f4f5f8;
+    --card:#ffffff;
+    --red-bg:#fbecec; --red-fg:#992325;
+    --amber-bg:#fdf0dc; --amber-fg:#a35d06;
+    --blue-bg:#e9eff6; --blue-fg:#1a3d6d;
+    --green-bg:#e7f4ec; --green-fg:#1f7a44;
+    --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--surface); color:var(--ink);
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+    font-size:15px; line-height:1.5;
+  }
+  .topbar{
+    background:linear-gradient(90deg,var(--pru-blue-deep) 0%,var(--pru-blue) 38%,var(--pru-red) 100%);
+    color:#fff; padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:8px;background:#fff;color:var(--pru-red);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;
+  }
+  .brand-name{font-weight:700;font-size:16px;letter-spacing:.2px;}
+  .brand-sub{font-size:11px;opacity:.85;margin-top:-2px;}
+  .top-right{display:flex;align-items:center;gap:18px;font-size:13px;}
+  .top-right .ti{font-size:19px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--pru-saffron);color:#5a3804;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+
+  .pagehead{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+  .pagehead h1{font-size:23px;font-weight:700;margin:0;color:var(--ink);}
+  .pagehead p{margin:5px 0 0;color:var(--muted);font-size:14px;}
+  .btn{
+    border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:9px 15px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .btn:hover{background:var(--surface);}
+  .btn-primary{background:var(--pru-red);border-color:var(--pru-red);color:#fff;}
+  .btn-primary:hover{background:var(--pru-red-dark);}
+
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+  .tile{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 16px;cursor:pointer;transition:.15s;border-top:3px solid transparent;
+  }
+  .tile:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,30,60,.08);}
+  .tile .lbl{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:8px;font-weight:600;}
+  .tile .val{font-size:27px;font-weight:700;line-height:1;}
+  .tile.t-neutral{border-top-color:var(--pru-blue);}
+  .tile.t-red{border-top-color:var(--pru-red);} .tile.t-red .val{color:var(--pru-red);} .tile.t-red .lbl{color:var(--red-fg);}
+  .tile.t-amber{border-top-color:var(--pru-saffron);} .tile.t-amber .val{color:#b9710a;} .tile.t-amber .lbl{color:var(--amber-fg);}
+  .tile.t-green{border-top-color:#2f9d5b;} .tile.t-green .val{color:#1f7a44;} .tile.t-green .lbl{color:var(--green-fg);}
+
+  .filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+  .filters .flabel{font-size:13px;color:var(--hint);font-weight:600;display:flex;align-items:center;gap:5px;margin-right:2px;}
+  select{
+    border:1px solid var(--line);background:#fff;border-radius:var(--radius-sm);
+    padding:7px 11px;font-size:13px;color:var(--ink);cursor:pointer;font-family:inherit;
+  }
+  select:focus{outline:none;border-color:var(--pru-blue);box-shadow:0 0 0 3px rgba(26,61,109,.12);}
+
+  .grid2{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .panel-head h2{font-size:16px;font-weight:700;margin:0;}
+  .panel-head .count{font-size:12px;color:var(--muted);}
+
+  .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+  .row:last-child{border-bottom:none;}
+  .row:hover{background:#fafbfc;}
+  .row .main{min-width:0;flex:1;}
+  .row .title{font-size:14px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .row .sub{font-size:12px;color:var(--muted);margin:2px 0 0;}
+  .row .right{text-align:right;flex-shrink:0;}
+  .pill{font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;}
+  .pill.overdue{background:var(--red-bg);color:var(--red-fg);}
+  .pill.missed{background:var(--amber-bg);color:var(--amber-fg);}
+  .pill.amc{background:var(--blue-bg);color:var(--blue-fg);}
+  .when{font-size:11px;color:var(--hint);margin:4px 0 0;}
+
+  .daytag{width:36px;flex-shrink:0;text-align:center;font-size:12px;font-weight:700;color:var(--pru-blue);}
+  .state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;flex-shrink:0;}
+  .dot{width:8px;height:8px;border-radius:50%;}
+  .s-done{color:#1f7a44;} .s-done .dot{background:#1f7a44;}
+  .s-sched{color:var(--pru-blue);} .s-sched .dot{background:var(--pru-blue);}
+  .s-yts{color:#b9710a;} .s-yts .dot{background:var(--pru-saffron);}
+  .empty{font-size:13px;color:var(--hint);padding:10px 0;}
+
+  .footnote{margin-top:22px;font-size:12px;color:var(--hint);text-align:center;}
+
+  /* layout shell with sidebar */
+  .shell{display:flex;min-height:calc(100vh - 60px);}
+  .sidebar{
+    width:236px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);
+    padding:16px 0;overflow-y:auto;
+  }
+  .nav-section{padding:6px 16px 4px;font-size:11px;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--hint);margin-top:8px;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:9px 16px;margin:1px 8px;
+    border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;color:#48505e;cursor:pointer;
+    transition:.12s;border-left:3px solid transparent;
+  }
+  .nav-item .ti{font-size:18px;flex-shrink:0;}
+  .nav-item:hover{background:var(--surface);color:var(--ink);}
+  .nav-item.active{background:var(--red-bg);color:var(--pru-red);border-left-color:var(--pru-red);}
+  .nav-item .badge{margin-left:auto;background:var(--pru-red);color:#fff;font-size:10.5px;font-weight:700;
+    padding:1px 7px;border-radius:10px;}
+  .nav-item .badge.amber{background:var(--pru-saffron);color:#5a3804;}
+  .content{flex:1;min-width:0;background:var(--surface);}
+  .wrap{max-width:1180px;margin:0;padding:24px 28px 48px;}
+
+  @media(max-width:900px){
+    .tiles{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">i</div>
+    <div>
+      <div class="brand-name">ICICI Prudential</div>
+      <div class="brand-sub">Preventive Maintenance System</div>
+    </div>
+  </div>
+  <div class="top-right">
+    <span><i class="ti ti-search"></i></span>
+    <span style="position:relative;"><i class="ti ti-bell"></i></span>
+    <span><i class="ti ti-grid-dots"></i></span>
+    <div class="avatar">RS</div>
+  </div>
+</div>
+
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="nav-item active" onclick="nav(this,'Dashboard / Home')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+
+    <div class="nav-section">Maintenance</div>
+    <div class="nav-item" onclick="nav(this,'52-Week PPM Tracker')"><i class="ti ti-layout-grid"></i> 52-Week Tracker</div>
+    <div class="nav-item" onclick="nav(this,'Schedule Generation')"><i class="ti ti-calendar-plus"></i> Generate Schedule</div>
+    <div class="nav-item" onclick="nav(this,'Visits')"><i class="ti ti-checklist"></i> Visits <span class="badge">10</span></div>
+    <div class="nav-item" onclick="nav(this,'Escalations')"><i class="ti ti-alert-triangle"></i> Escalations <span class="badge amber">3</span></div>
+
+    <div class="nav-section">Assets</div>
+    <div class="nav-item" onclick="nav(this,'Equipment Master')"><i class="ti ti-building-factory-2"></i> Equipment Master</div>
+    <div class="nav-item" onclick="nav(this,'Bulk Upload')"><i class="ti ti-upload"></i> Bulk Upload</div>
+    <div class="nav-item" onclick="nav(this,'AMC Contracts')"><i class="ti ti-file-certificate"></i> AMC Contracts</div>
+    <div class="nav-item" onclick="nav(this,'Vendors')"><i class="ti ti-users-group"></i> Vendors</div>
+
+    <div class="nav-section">Insights</div>
+    <div class="nav-item" onclick="nav(this,'Reports')"><i class="ti ti-chart-bar"></i> Reports</div>
+    <div class="nav-item" onclick="nav(this,'Maintenance History')"><i class="ti ti-history"></i> History</div>
+
+    <div class="nav-section">Configure</div>
+    <div class="nav-item" onclick="nav(this,'Frequency & Defaults')"><i class="ti ti-adjustments"></i> Frequency Rules</div>
+    <div class="nav-item" onclick="nav(this,'Reminder Settings')"><i class="ti ti-bell-cog"></i> Reminders</div>
+    <div class="nav-item" onclick="nav(this,'Settings')"><i class="ti ti-settings"></i> Settings</div>
+  </nav>
+
+  <div class="content">
+
+<div class="wrap">
+
+  <div class="pagehead">
+    <div>
+      <h1>Good morning, Rahul</h1>
+      <p>Pan-India preventive maintenance overview · Week 24, 2026</p>
+    </div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn" onclick="toast('Opening 52-week PPM tracker')"><i class="ti ti-layout-grid"></i> Open tracker</button>
+      <button class="btn btn-primary" onclick="toast('Opening Add Asset form')"><i class="ti ti-plus"></i> Add asset</button>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile t-neutral" onclick="toast('Filtering tracker: due this week')">
+      <div class="lbl"><i class="ti ti-calendar-clock"></i> Due this week</div>
+      <div class="val">38</div>
+    </div>
+    <div class="tile t-red" onclick="toast('Filtering tracker: overdue')">
+      <div class="lbl"><i class="ti ti-alert-triangle"></i> Overdue</div>
+      <div class="val">7</div>
+    </div>
+    <div class="tile t-amber" onclick="toast('Filtering tracker: missed')">
+      <div class="lbl"><i class="ti ti-clock-x"></i> Missed</div>
+      <div class="val">3</div>
+    </div>
+    <div class="tile t-neutral" onclick="toast('Filtering tracker: upcoming 30 days')">
+      <div class="lbl"><i class="ti ti-calendar-plus"></i> Upcoming 30d</div>
+      <div class="val">142</div>
+    </div>
+    <div class="tile t-green" onclick="toast('Opening compliance by region')">
+      <div class="lbl"><i class="ti ti-circle-check"></i> Compliance</div>
+      <div class="val">94%</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <span class="flabel"><i class="ti ti-filter"></i> Filter</span>
+    <select id="f-loc" onchange="applyFilters()">
+      <option value="all">All locations</option>
+      <option>Mumbai</option><option>Delhi</option><option>Bengaluru</option><option>Hyderabad</option><option>Chennai</option>
+    </select>
+    <select id="f-cat" onchange="applyFilters()">
+      <option value="all">All categories</option>
+      <option>AC / HVAC</option><option>Electrical</option><option>Fire safety</option><option>UPS / DG</option>
+    </select>
+    <select id="f-ven" onchange="applyFilters()">
+      <option value="all">All vendors</option>
+      <option>Blue Star</option><option>Voltas</option><option>Schneider</option><option>Power Solution</option>
+    </select>
+    <select id="f-freq" onchange="applyFilters()">
+      <option value="all">All frequencies</option>
+      <option>Quarterly</option><option>Half-Yearly</option><option>Monthly</option><option>Yearly</option>
+    </select>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Needs attention</h2>
+        <span class="count" id="attn-count">5 items</span>
+      </div>
+      <div id="attn-list"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>This week's schedule</h2>
+        <span class="count" id="week-count">5 visits</span>
+      </div>
+      <div id="week-list"></div>
+    </div>
+  </div>
+
+  <div class="footnote">Illustrative mockup · sample data · ICICI Prudential Preventive Maintenance System — Facility Manager view</div>
+</div>
+
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--pru-blue-deep);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  opacity:0;transition:.25s;pointer-events:none;z-index:50;"></div>
+
+<script>
+const attnData = [
+  { asset:"Split AC · Unit 4", loc:"Chennai · Anna Nagar", vendor:"Blue Star", cat:"AC / HVAC", freq:"Quarterly", status:"overdue", days:"4 days overdue" },
+  { asset:"Main DB Panel", loc:"Mumbai · BKC", vendor:"Schneider", cat:"Electrical", freq:"Half-Yearly", status:"overdue", days:"2 days overdue" },
+  { asset:"Fire alarm loop", loc:"Delhi · Connaught Pl", vendor:"Power Solution", cat:"Fire safety", freq:"Quarterly", status:"missed", days:"Missed · re-schedule" },
+  { asset:"UPS 20kVA", loc:"Bengaluru · Whitefield", vendor:"Schneider", cat:"UPS / DG", freq:"Monthly", status:"overdue", days:"1 day overdue" },
+  { asset:"AMC expiry · Voltas", loc:"Hyderabad · Gachibowli", vendor:"Voltas", cat:"AC / HVAC", freq:"Quarterly", status:"amc", days:"AMC expires in 12 days" },
+];
+const weekData = [
+  { day:"Mon", asset:"Cassette AC · Floor 2", loc:"Mumbai · BKC", cat:"AC / HVAC", vendor:"Blue Star", freq:"Quarterly", state:"done" },
+  { day:"Tue", asset:"Electrical PMS audit", loc:"Delhi · CP", cat:"Electrical", vendor:"Schneider", freq:"Half-Yearly", state:"sched" },
+  { day:"Wed", asset:"DG set service", loc:"Bengaluru · WF", cat:"UPS / DG", vendor:"Power Solution", freq:"Monthly", state:"yts" },
+  { day:"Thu", asset:"Split AC · Unit 7", loc:"Chennai · Anna Nagar", cat:"AC / HVAC", vendor:"Blue Star", freq:"Quarterly", state:"sched" },
+  { day:"Fri", asset:"Fire extinguisher check", loc:"Hyderabad · Gachibowli", cat:"Fire safety", vendor:"Power Solution", freq:"Yearly", state:"sched" },
+];
+
+function f(id){return document.getElementById(id).value;}
+function match(r){
+  const l=f('f-loc'),c=f('f-cat'),v=f('f-ven'),q=f('f-freq');
+  return (l==='all'||r.loc.indexOf(l)>-1)&&(c==='all'||r.cat===c)&&(v==='all'||r.vendor===v)&&(q==='all'||r.freq===q);
+}
+const stateMap={done:['s-done','Completed'],sched:['s-sched','Scheduled'],yts:['s-yts','Yet to start']};
+
+function renderAttn(){
+  const rows=attnData.filter(match);
+  document.getElementById('attn-count').textContent=rows.length+' item'+(rows.length===1?'':'s');
+  const el=document.getElementById('attn-list');
+  if(!rows.length){el.innerHTML='<div class="empty">No items match these filters.</div>';return;}
+  el.innerHTML=rows.map(r=>
+    '<div class="row" onclick="toast(\'Opening visit · '+r.asset+'\')">'+
+      '<div class="main"><p class="title">'+r.asset+'</p><p class="sub">'+r.loc+' · '+r.vendor+'</p></div>'+
+      '<div class="right"><span class="pill '+r.status+'">'+(r.status==='amc'?'AMC':r.status.charAt(0).toUpperCase()+r.status.slice(1))+'</span>'+
+      '<p class="when">'+r.days+'</p></div>'+
+    '</div>').join('');
+}
+function renderWeek(){
+  const rows=weekData.filter(match);
+  document.getElementById('week-count').textContent=rows.length+' visit'+(rows.length===1?'':'s');
+  const el=document.getElementById('week-list');
+  if(!rows.length){el.innerHTML='<div class="empty">No visits match these filters.</div>';return;}
+  el.innerHTML=rows.map(r=>{
+    const [cls,label]=stateMap[r.state];
+    return '<div class="row" onclick="toast(\'Update status · '+r.asset+'\')">'+
+      '<div class="daytag">'+r.day+'</div>'+
+      '<div class="main"><p class="title" style="font-size:13.5px;">'+r.asset+'</p><p class="sub">'+r.loc+'</p></div>'+
+      '<span class="state '+cls+'"><span class="dot"></span>'+label+'</span>'+
+    '</div>';
+  }).join('');
+}
+function applyFilters(){renderAttn();renderWeek();}
+
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},1800);
+}
+renderAttn();renderWeek();
+
+function nav(el,name){
+  var pages = {
+    'Dashboard / Home': 'icici-pru-fm-dashboard.html',
+    '52-Week PPM Tracker': 'icici-pru-52week-tracker.html'
+  };
+  if (pages[name]) {
+    window.location.href = pages[name];
+    return;
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  toast('Opening · '+name);
+}
+</script>
+</body>
+</html>

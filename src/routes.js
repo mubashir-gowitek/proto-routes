@@ -42,6 +42,19 @@ const pages = [
     title: 'Florida Hardware — Purchase Order Intelligence',
     description: 'Florida Hardware revenue intelligence platform for purchase order analysis.',
   },
+  {
+    path: '/banner-solutions',
+    file: '/pages/banner-solutions.html',
+    title: 'Banner Solutions — AI Storefront',
+    description: 'Interactive AI storefront prototype for Banner Solutions.',
+  },
+  {
+    path: '/icici-pru-preventive-maintenance',
+    file: '/pages/icici-pru-fm-dashboard.html',
+    title: 'ICICI Prudential — Preventive Maintenance',
+    description:
+      'Facility manager dashboard and 52-week PPM tracker for ICICI Prudential preventive maintenance.',
+  },
 ];
 
 export default pages;
